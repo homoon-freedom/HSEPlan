@@ -1,0 +1,2486 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KR ABB HSE Plan_ABB-EL-ELSE-HSE-01</title>
+  <style>
+    :root {
+      --abb-red: #ff000f;
+      --abb-red-dark: #d9000d;
+      --bg-app: #f1f5f9;
+      --bg-panel: #ffffff;
+      --border-color: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --preview-scale: 0.72;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', Arial, sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-main);
+      overflow: hidden;
+    }
+
+    /* ==================== 상단 고정 툴바 ==================== */
+    .top-toolbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 56px;
+      background: #0f172a;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      gap: 12px;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .toolbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 16px;
+      white-space: nowrap;
+    }
+
+    .toolbar-badge {
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #f8fafc;
+      white-space: nowrap;
+    }
+
+    .toolbar-filename-hint {
+      font-size: 11px;
+      color: #94a3b8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 7px 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+
+    .btn-dark {
+      background: #1e293b;
+      color: #f8fafc;
+      border-color: #334155;
+    }
+    .btn-dark:hover { background: #334155; }
+
+    .btn-secondary {
+      background: #f8fafc;
+      color: #1e293b;
+      border-color: #cbd5e1;
+    }
+    .btn-secondary:hover { background: #e2e8f0; }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #ffffff;
+    }
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-abb {
+      background: var(--abb-red);
+      color: #ffffff;
+      font-weight: 700;
+      padding: 7px 15px;
+    }
+    .btn-abb:hover { background: var(--abb-red-dark); }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 11.5px;
+      border-radius: 4px;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+    .btn-danger:hover { background: #fecaca; }
+
+    .btn-edit {
+      background: #e0f2fe;
+      color: #0369a1;
+      border-color: #bae6fd;
+    }
+    .btn-edit:hover { background: #bae6fd; }
+
+    /* ==================== 메인 2단 작업 영역 (좌 2/3, 우 1/3) ==================== */
+    .main-workspace {
+      display: flex;
+      width: 100%;
+      height: calc(100vh - 56px);
+      margin-top: 56px;
+      overflow: hidden;
+    }
+
+    .input-pane {
+      width: 64%;
+      min-width: 520px;
+      height: 100%;
+      overflow-y: auto;
+      padding: 18px 22px 48px 22px;
+      background: #f8fafc;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .preview-pane {
+      width: 36%;
+      min-width: 380px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: #64748b;
+      overflow: hidden;
+    }
+
+    .preview-controls {
+      height: 40px;
+      min-height: 40px;
+      background: #334155;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 12px;
+      border-bottom: 1px solid #475569;
+    }
+
+    .preview-zoom-btns {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .preview-scroll-container {
+      flex: 1;
+      overflow: auto;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #print-scale-wrapper {
+      transform: scale(var(--preview-scale));
+      transform-origin: top center;
+      width: 210mm;
+      transition: transform 0.15s ease;
+    }
+
+    #print-area {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 210mm;
+    }
+
+    /* ==================== 입력 폼 카드 스타일 ==================== */
+    .form-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+
+    .form-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 9px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+
+    .form-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-card-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 16px;
+      background: var(--abb-red);
+      border-radius: 2px;
+    }
+
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .form-grid-4 {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr 0.7fr;
+      gap: 10px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 7px 10px;
+      font-size: 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-family: inherit;
+      color: #0f172a;
+      background: #ffffff;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+
+    .form-control[readonly] {
+      background: #f1f5f9;
+      color: #475569;
+      font-weight: 700;
+    }
+
+    textarea.auto-expand {
+      resize: none;
+      overflow: hidden;
+      min-height: 76px;
+      line-height: 1.5;
+    }
+
+    /* 입력 테이블 */
+    .input-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    .input-table th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 700;
+      text-align: left;
+      padding: 8px 10px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .input-table td {
+      padding: 6px 8px;
+      border: 1px solid #e2e8f0;
+      vertical-align: middle;
+    }
+
+    .input-table input,
+    .input-table select {
+      width: 100%;
+      padding: 5px 8px;
+      font-size: 12.5px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-family: inherit;
+    }
+
+    .input-table input:disabled,
+    .input-table select:disabled {
+      background: #f8fafc;
+      border-color: transparent;
+      color: #0f172a;
+      font-weight: 500;
+    }
+
+    .action-cell {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      white-space: nowrap;
+    }
+
+    /* ==================== A4 인쇄 & 미리보기 공통 규격 (100% 동일 규격) ==================== */
+    .a4-page {
+      width: 210mm;
+      height: 297mm;
+      min-height: 297mm;
+      max-height: 297mm;
+      background: #ffffff;
+      color: #000000;
+      padding: 11mm 13mm 12mm 13mm;
+      box-sizing: border-box;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+      font-size: 8.8pt;
+      line-height: 1.38;
+      letter-spacing: -0.01em;
+    }
+
+    /* 페이지 머리글 */
+    .doc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1.5pt solid #000000;
+      padding-bottom: 3.5mm;
+      margin-bottom: 3.5mm;
+      min-height: 11mm;
+    }
+
+    .doc-header-left {
+      font-size: 9pt;
+      font-weight: 700;
+      color: #333333;
+    }
+
+    .doc-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 페이지 본문 */
+    .page-body {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 페이지 바닥글 */
+    .doc-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1pt solid #666666;
+      padding-top: 2.5mm;
+      margin-top: 3mm;
+      font-size: 8pt;
+      color: #333333;
+      min-height: 7mm;
+    }
+
+    /* 표지(Page 1) 전용 스타일 */
+    .cover-top-grid {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2pt solid #ff000f;
+      padding-bottom: 5mm;
+      margin-bottom: 10mm;
+    }
+
+    .cover-company {
+      font-size: 13pt;
+      font-weight: 800;
+      margin-bottom: 4mm;
+    }
+
+    .cover-dept-table {
+      border-collapse: collapse;
+      font-size: 9pt;
+    }
+
+    .cover-dept-table td {
+      padding: 1.5mm 3mm 1.5mm 0;
+    }
+
+    .cover-dept-label {
+      font-weight: 700;
+      color: #444444;
+      width: 28mm;
+    }
+
+    .cover-dept-val {
+      font-weight: 700;
+      color: #000000;
+    }
+
+    .cover-title-block {
+      margin: 14mm 0 14mm 0;
+      padding: 10mm 8mm;
+      border-left: 5pt solid #ff000f;
+      background: #fafafa;
+    }
+
+    .cover-main-title {
+      font-size: 25pt;
+      font-weight: 800;
+      color: #000000;
+      margin: 0 0 3mm 0;
+      letter-spacing: -0.02em;
+    }
+
+    .cover-sub-title {
+      font-size: 13pt;
+      font-weight: 600;
+      color: #555555;
+      margin: 0;
+    }
+
+    .cover-info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12mm;
+      table-layout: fixed;
+    }
+
+    .cover-info-table th,
+    .cover-info-table td {
+      border: 1pt solid #222222;
+      padding: 3.5mm 3.5mm;
+      font-size: 9.5pt;
+      vertical-align: middle;
+      word-break: break-word;
+    }
+
+    .cover-info-table th {
+      background: #f2f2f2;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    .cover-sign-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: auto;
+      margin-bottom: 6mm;
+      table-layout: fixed;
+    }
+
+    .cover-sign-table th,
+    .cover-sign-table td {
+      border: 1pt solid #222222;
+      padding: 3mm;
+      text-align: center;
+      font-size: 9pt;
+    }
+
+    .cover-sign-table th {
+      background: #f2f2f2;
+      font-weight: 700;
+    }
+
+    .cover-sign-box {
+      height: 16mm;
+      vertical-align: bottom !important;
+      font-weight: 700;
+    }
+
+    /* 목차(Page 2) 스타일 */
+    .toc-title {
+      font-size: 16pt;
+      font-weight: 800;
+      margin: 2mm 0 6mm 0;
+      padding-bottom: 2mm;
+      border-bottom: 1.5pt solid #ff000f;
+    }
+
+    .toc-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10mm;
+      font-size: 9.2pt;
+      line-height: 1.55;
+    }
+
+    .toc-section {
+      font-weight: 800;
+      margin-top: 3mm;
+      margin-bottom: 1mm;
+      color: #000000;
+    }
+
+    .toc-item {
+      padding-left: 4mm;
+      color: #222222;
+    }
+
+    /* 문서 내부 섹션/표 스타일 */
+    .sec-h1 {
+      font-size: 11.5pt;
+      font-weight: 800;
+      color: #000000;
+      background: #f2f4f7;
+      border-left: 3.5pt solid #ff000f;
+      padding: 1.5mm 3mm;
+      margin: 2.5mm 0 2mm 0;
+    }
+
+    .sec-h1:first-child {
+      margin-top: 0;
+    }
+
+    .sec-h2 {
+      font-size: 9.6pt;
+      font-weight: 800;
+      color: #111111;
+      margin: 2.2mm 0 1.2mm 0;
+    }
+
+    .sec-h3 {
+      font-size: 8.9pt;
+      font-weight: 700;
+      color: #222222;
+      margin: 1.6mm 0 0.8mm 0;
+    }
+
+    .doc-p {
+      margin: 0 0 1.5mm 0;
+      text-align: justify;
+    }
+
+    .doc-ul {
+      margin: 0 0 1.8mm 0;
+      padding-left: 4.5mm;
+    }
+
+    .doc-ul li {
+      margin-bottom: 0.7mm;
+    }
+
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5mm 0 2.5mm 0;
+      font-size: 8.2pt;
+      line-height: 1.3;
+    }
+
+    .doc-table th,
+    .doc-table td {
+      border: 0.75pt solid #333333;
+      padding: 1.4mm 2mm;
+      vertical-align: middle;
+      word-break: break-word;
+    }
+
+    .doc-table th {
+      background: #eaeef3;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .text-center { text-align: center; }
+    .text-bold { font-weight: 700; }
+
+    .scope-box {
+      border: 0.75pt solid #444444;
+      background: #fcfcfc;
+      padding: 2mm 2.5mm;
+      white-space: pre-wrap;
+      font-size: 8.4pt;
+      line-height: 1.35;
+      margin-bottom: 2mm;
+    }
+
+    .drawing-box {
+      border: 0.75pt dashed #666666;
+      padding: 2mm;
+      text-align: center;
+      min-height: 22mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1mm;
+    }
+
+    .drawing-box img {
+      max-width: 100%;
+      max-height: 46mm;
+      object-fit: contain;
+    }
+
+    /* 모달 공통 스타일 */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 960px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 14px 20px;
+      background: #0f172a;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .modal-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 12px 20px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* ==================== 실제 PDF 인쇄 미디어 쿼리 (미리보기와 100% 동일 규격) ==================== */
+    @page {
+      size: A4 portrait;
+      margin: 0mm;
+    }
+
+    @media print {
+      html, body {
+        width: 210mm !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .top-toolbar,
+      .input-pane,
+      .preview-controls,
+      .modal-backdrop,
+      .no-print {
+        display: none !important;
+      }
+
+      .main-workspace {
+        display: block !important;
+        width: 210mm !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+      }
+
+      .preview-pane {
+        display: block !important;
+        width: 210mm !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        overflow: visible !important;
+      }
+
+      .preview-scroll-container {
+        display: block !important;
+        width: 210mm !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+      }
+
+      #print-scale-wrapper {
+        transform: none !important;
+        width: 210mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      #print-area {
+        display: block !important;
+        width: 210mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        gap: 0 !important;
+      }
+
+      .a4-page {
+        width: 210mm !important;
+        height: 297mm !important;
+        min-height: 297mm !important;
+        max-height: 297mm !important;
+        margin: 0 !important;
+        padding: 11mm 13mm 12mm 13mm !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+      }
+
+      .a4-page:last-child {
+        page-break-after: auto !important;
+        break-after: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 상단 고정 툴바 -->
+  <header class="top-toolbar no-print">
+    <div class="toolbar-left">
+      <div class="toolbar-brand">
+        <span style="color:#ff000f; font-weight:900; font-size:18px;">ABB</span>
+        <span>KR ABB HSE Plan 생성기</span>
+      </div>
+      <span class="toolbar-badge" id="toolbar-doc-no">ABB-EL-ELSE-HSE-01</span>
+      <span class="toolbar-filename-hint" id="toolbar-filename-hint">PDF 파일명: KR ABB HSE Plan_ABB-EL-ELSE-HSE-01.pdf</span>
+    </div>
+    <div class="toolbar-actions">
+      <button type="button" class="btn btn-dark" onclick="openSavedModal()">저장된 계획서 관리</button>
+      <button type="button" class="btn btn-primary" onclick="saveCurrentPlan()">계획서 저장</button>
+      <button type="button" class="btn btn-secondary" onclick="exportJSON()">JSON 백업</button>
+      <button type="button" class="btn btn-secondary" onclick="document.getElementById('json-import-input').click()">JSON 복원</button>
+      <input type="file" id="json-import-input" accept=".json" style="display:none" onchange="importJSON(event)" />
+      <button type="button" class="btn btn-secondary" onclick="resetToDefault()">초기화</button>
+      <button type="button" class="btn btn-abb" onclick="triggerPDFPrint()">PDF 인쇄 / 저장</button>
+    </div>
+  </header>
+
+  <!-- 메인 2단 작업 영역 -->
+  <div class="main-workspace">
+    <!-- 좌측 입력 패널 (2/3) -->
+    <section class="input-pane no-print">
+
+      <!-- 1. 기본 정보 및 조직 구분 -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-title">1. 프로젝트 및 문서 기본 정보</div>
+          <span style="font-size:12px; color:#64748b;">문서번호 형식: <b>ABB-Division-Business Line-HSE-01</b></span>
+        </div>
+
+        <div class="form-grid-4">
+          <div class="form-group">
+            <label>Business Area</label>
+            <input type="text" id="businessArea" class="form-control" value="Electrification" oninput="handleFormChange()" />
+          </div>
+          <div class="form-group">
+            <label>Division</label>
+            <input type="text" id="division" class="form-control" value="EL" oninput="handleDocNoPartsChange()" />
+          </div>
+          <div class="form-group">
+            <label>Business Line</label>
+            <input type="text" id="businessLine" class="form-control" value="ELSE" oninput="handleDocNoPartsChange()" />
+          </div>
+          <div class="form-group">
+            <label>순번 (No.)</label>
+            <input type="text" id="docSeq" class="form-control" value="01" oninput="handleDocNoPartsChange()" />
+          </div>
+        </div>
+
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label>문서 No. (자동생성 / 직접수정 가능)</label>
+            <input type="text" id="docNumber" class="form-control" value="ABB-EL-ELSE-HSE-01" oninput="handleDocNumberManualChange()" />
+          </div>
+          <div class="form-group">
+            <label>고객사명 (Client)</label>
+            <input type="text" id="clientName" class="form-control" value="TEST 1" oninput="handleFormChange()" />
+          </div>
+          <div class="form-group">
+            <label>작성일자</label>
+            <input type="date" id="docDate" class="form-control" oninput="handleFormChange()" />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>프로젝트 이름 (Project Name)</label>
+            <input type="text" id="projectName" class="form-control" value="DCS Modification" oninput="handleFormChange()" />
+          </div>
+          <div class="form-group">
+            <label>프로젝트 위치 (Location)</label>
+            <input type="text" id="projectLocation" class="form-control" value="거제" oninput="handleFormChange()" />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>프로젝트 시작일</label>
+            <input type="date" id="startDate" class="form-control" value="2026-11-20" oninput="handleFormChange()" />
+          </div>
+          <div class="form-group">
+            <label>프로젝트 종료일</label>
+            <input type="date" id="endDate" class="form-control" value="2026-12-20" oninput="handleFormChange()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 프로젝트 요약 및 범위 (1.3) & 도면 첨부 (1.5) -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-title">2. 프로젝트 요약 및 범위 (1.3) / 설치 도면 (1.5)</div>
+        </div>
+        <div class="form-group">
+          <label>1.3 프로젝트 요약 및 범위</label>
+          <textarea id="projectScope" class="form-control auto-expand" oninput="autoExpandTextarea(this); handleFormChange();">#1PX 2차 MVR 설치관련 ABB DCS Modification
+1. Software work
+  1) MVR-II Database 작업
+  2) MVR-II Graphic 작업
+2. Hardware work
+  1) Inter-wiring 작업 in Marshalling Panel
+3. Commissioning</textarea>
+        </div>
+        <div class="form-grid-2" style="align-items:end;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label>1.5 설치 및 서비스 도면/단선도 첨부 (이미지)</label>
+            <input type="file" id="drawingInput" class="form-control" accept="image/*" onchange="handleDrawingUpload(event)" />
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <input type="text" id="drawingCaption" class="form-control" placeholder="도면 캡션 (예: 시스템 구성도 / 단선도)" oninput="handleFormChange()" />
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeDrawing()">도면 삭제</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. 주요 연락처 - ABB (Key Contacts) -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-title">3. 주요 연락처 - ABB (조직도 및 본문 자동 연동)</div>
+          <button type="button" class="btn btn-primary btn-sm" onclick="addKeyContact()">+ 인원 추가</button>
+        </div>
+        <div style="font-size:12px; color:#64748b; margin-bottom:8px;">
+          * 기본 직책(프로젝트 관리자 ~ 응급 처치 담당자)이 고정 설정되어 있으며, 사전 등록된 인원 선택 또는 <b>수정/삭제</b>가 가능합니다.
+        </div>
+        <table class="input-table">
+          <thead>
+            <tr>
+              <th style="width:24%;">직책</th>
+              <th style="width:25%;">사전 등록 선택</th>
+              <th style="width:20%;">이름</th>
+              <th style="width:19%;">연락처</th>
+              <th style="width:12%; text-align:center;">관리</th>
+            </tr>
+          </thead>
+          <tbody id="key-contacts-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- 4. 협력업체 (Contractors) -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-title">4. 협력업체 관리 (1.4 협력업체 표 연동)</div>
+          <button type="button" class="btn btn-primary btn-sm" onclick="addContractor()">+ 협력업체 추가</button>
+        </div>
+        <table class="input-table">
+          <thead>
+            <tr>
+              <th style="width:32%;">협력업체 이름</th>
+              <th style="width:26%;">이름</th>
+              <th style="width:28%;">연락처</th>
+              <th style="width:14%; text-align:center;">관리</th>
+            </tr>
+          </thead>
+          <tbody id="contractors-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- 5. 잔류 위험요소 및 위험성 평가 (4.2) -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-title">5. 잠재 및 잔류 위험요소 식별 / 통제 조치 (4.2)</div>
+          <button type="button" class="btn btn-primary btn-sm" onclick="openHazardModal()">위험요소 체크리스트 편집</button>
+        </div>
+        <div id="hazard-summary-box" style="font-size:12.5px; color:#334155; background:#f8fafc; padding:10px 12px; border-radius:6px; border:1px solid #e2e8f0;"></div>
+      </div>
+
+    </section>
+
+    <!-- 우측 실시간 A4 미리보기 패널 (1/3) -->
+    <section class="preview-pane">
+      <div class="preview-controls no-print">
+        <span id="preview-page-count" style="font-weight:700;">실시간 A4 미리보기 (총 10페이지)</span>
+        <div class="preview-zoom-btns">
+          <button type="button" class="btn btn-dark btn-sm" onclick="changeZoom(-0.08)">-</button>
+          <span id="zoom-label" style="min-width:44px; text-align:center;">72%</span>
+          <button type="button" class="btn btn-dark btn-sm" onclick="changeZoom(0.08)">+</button>
+          <button type="button" class="btn btn-dark btn-sm" onclick="fitPreviewZoom()">맞춤</button>
+        </div>
+      </div>
+      <div class="preview-scroll-container" id="preview-scroll-container">
+        <div id="print-scale-wrapper">
+          <div id="print-area"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 위험요소 체크리스트 모달 -->
+  <div class="modal-backdrop no-print" id="hazard-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>4.2 잔류 위험요소 식별 및 통제 조치 체크리스트</h3>
+        <button type="button" class="btn btn-dark btn-sm" onclick="closeHazardModal()">닫기</button>
+      </div>
+      <div class="modal-body">
+        <table class="input-table">
+          <thead>
+            <tr>
+              <th style="width:20%;">위험요소</th>
+              <th style="width:10%; text-align:center;">식별(V)</th>
+              <th style="width:10%; text-align:center;">통제(V)</th>
+              <th style="width:60%;">통제 조치 세부 내용</th>
+            </tr>
+          </thead>
+          <tbody id="hazard-modal-tbody"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="closeHazardModal()">적용 및 닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 저장된 계획서 관리 모달 -->
+  <div class="modal-backdrop no-print" id="saved-modal">
+    <div class="modal-box" style="max-width: 1020px;">
+      <div class="modal-header">
+        <h3>저장된 Project HSE Plan 관리</h3>
+        <button type="button" class="btn btn-dark btn-sm" onclick="closeSavedModal()">닫기</button>
+      </div>
+      <div class="modal-body">
+        <table class="input-table">
+          <thead>
+            <tr>
+              <th style="width:25%;">문서번호 / 프로젝트명</th>
+              <th style="width:22%;">부서 (Area / Div / BL)</th>
+              <th style="width:18%;">고객사 / 위치</th>
+              <th style="width:14%;">프로젝트 일정</th>
+              <th style="width:10%; text-align:center;">저장일</th>
+              <th style="width:11%; text-align:center;">관리</th>
+            </tr>
+          </thead>
+          <tbody id="saved-plans-tbody"></tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeSavedModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  /* ==================== 사전 등록 인원 및 기본 데이터 ==================== */
+  const PRESET_STAFF = [
+    { name: '김개똥', phone: '010-2345-6789' },
+    { name: '김철수', phone: '010-9876-5432' },
+    { name: '고길동', phone: '010-1234-5678' },
+    { name: '이영희', phone: '010-1357-2468' },
+    { name: '박민수', phone: '010-3456-7890' },
+    { name: '정수진', phone: '010-5678-1234' },
+    { name: '최현우', phone: '010-8765-4321' }
+  ];
+
+  const DEFAULT_HAZARDS = [
+    { name: '고소작업', identified: true, controlled: true, detail: '비계, 작업 발판 또는 고소 작업대와 같은 적절한 접근 및 작업 공간 제공' },
+    { name: '소음', identified: false, controlled: false, detail: '가능한 최저 소음 수준을 달성하기 위한 엔지니어링 제어의 설계 및 채택 및 청력보호구 지급' },
+    { name: '화학물질', identified: false, controlled: false, detail: '작성된 ABRA 및 MSDS에 따라 관련 직원 및 협력업체에게 화학 물질에 대한 적절한 교육 및 보호구 제공' },
+    { name: '전기', identified: true, controlled: true, detail: '모든 전기 공사에 7단계 작업안전(7 Steps) 및 LOTO(1인 1자물쇠, 1열쇠) 적용' },
+    { name: '화재', identified: true, controlled: false, detail: '절단, 용접 또는 브레이징이 이루어지는 곳에서 발화를 방지하기 위한 내화성 실드 또는 가드 제공' },
+    { name: '교통 사고', identified: false, controlled: false, detail: 'ABB가 사용하거나 ABB를 대신하여 사용하는 모든 차량에 모든 탑승자를 위한 안전 벨트, ABS 브레이크, 계절별 타이어 장착 확인' },
+    { name: '기계류', identified: false, controlled: false, detail: '회전체 및 위험 부위에 적절한 방호장치 설치 및 작업 전 안전 점검 실시' },
+    { name: '악천후 환경 작업', identified: false, controlled: false, detail: '강풍, 폭우, 낙뢰 등 악천후 기상 예보 확인 및 기준 초과 시 즉시 작업 중지' },
+    { name: '해상 플랫폼 작업', identified: false, controlled: false, detail: '해상 작업 허가 절차 준수 및 구명조끼·추락방지장구 착용 의무화' },
+    { name: '하역기계 작업', identified: false, controlled: true, detail: '사용자는 하역기계에 대해 적절한 사전 점검을 수행하고 그 결과를 문서화' },
+    { name: '인양작업', identified: true, controlled: true, detail: '크레인 사용 전 제조업체 안전 인증서 및 법적 안전 검사 인증서 확인, 인양 전 모든 인양도구(후크, 아이볼트, 슬링, 체인, 와이어로프 등) 검사' },
+    { name: '큐비클 및 판넬 이동 작업', identified: true, controlled: true, detail: '이동 경로 바닥 상태 사전 확인. 바닥이 결함 없이 매끄러운 표면이 아닌 경우 팔레트 리프터 사용 금지 및 전도 방지 조치' },
+    { name: '상하차 작업', identified: false, controlled: false, detail: '상하차 구역 통제선 설치 및 신호수 배치, 차량 고임목 설치 확인' },
+    { name: '수동공구 및 전동공구', identified: false, controlled: false, detail: '절연 상태 및 방호 커버 사전 점검, 작업 용도에 맞는 인증 공구만 사용' },
+    { name: '수동 인양 작업', identified: false, controlled: false, detail: '중량물 취급 시 2인 1조 작업 또는 운반 보조기구 사용, 올바른 인양 자세 준수' },
+    { name: '산업 위생', identified: false, controlled: false, detail: '작업장 환기 유지, 분진·유해인자 노출 관리 및 위생/휴게 시설 확보' }
+  ];
+
+  function getTodayString() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  function createDefaultState() {
+    return {
+      businessArea: 'Electrification',
+      division: 'EL',
+      businessLine: 'ELSE',
+      docSeq: '01',
+      docNumber: 'ABB-EL-ELSE-HSE-01',
+      clientName: 'TEST 1',
+      docDate: getTodayString(),
+      projectName: 'DCS Modification',
+      projectLocation: '거제',
+      startDate: '2026-11-20',
+      endDate: '2026-12-20',
+      projectScope: `#1PX 2차 MVR 설치관련 ABB DCS Modification\n1. Software work\n  1) MVR-II Database 작업\n  2) MVR-II Graphic 작업\n2. Hardware work\n  1) Inter-wiring 작업 in Marshalling Panel\n3. Commissioning`,
+      drawingDataUrl: '',
+      drawingCaption: '',
+      keyContacts: [
+        { role: '프로젝트 관리자', name: '김개똥', phone: '010-2345-6789', fixed: true, editing: false },
+        { role: 'HSE', name: '김철수', phone: '010-9876-5432', fixed: true, editing: false },
+        { role: '선임 엔지니어', name: '고길동', phone: '010-1234-5678', fixed: true, editing: false },
+        { role: '엔지니어', name: '', phone: '', fixed: true, editing: false },
+        { role: '엔지니어', name: '', phone: '', fixed: true, editing: false },
+        { role: '엔지니어', name: '', phone: '', fixed: true, editing: false },
+        { role: '응급 처치 담당자', name: '이영희', phone: '010-1357-2468', fixed: true, editing: false }
+      ],
+      contractors: [
+        { company: 'ABCD', name: '뽀로로', phone: '010-0231-2341', editing: false },
+        { company: 'ABCD', name: '루피', phone: '010-4567-6789', editing: false }
+      ],
+      hazards: JSON.parse(JSON.stringify(DEFAULT_HAZARDS))
+    };
+  }
+
+  let appState = createDefaultState();
+  const STORAGE_CURRENT_KEY = 'kr_abb_hse_plan_current_v2';
+  const STORAGE_SAVED_LIST_KEY = 'kr_abb_hse_plan_saved_list_v2';
+
+  /* ==================== PDF 인쇄 파일명 동기화 ('KR ABB HSE Plan_문서번호') ==================== */
+  function sanitizeFilenamePart(str) {
+    return (str || 'ABB-EL-ELSE-HSE-01').replace(/[\\/:*?"<>|]/g, '-').trim();
+  }
+
+  function updatePdfDocumentTitle() {
+    const cleanDocNo = sanitizeFilenamePart(appState.docNumber);
+    const pdfTitle = `KR ABB HSE Plan_${cleanDocNo}`;
+    document.title = pdfTitle;
+    const badge = document.getElementById('toolbar-doc-no');
+    const hint = document.getElementById('toolbar-filename-hint');
+    if (badge) badge.textContent = cleanDocNo;
+    if (hint) hint.textContent = `PDF 파일명: ${pdfTitle}.pdf`;
+  }
+
+  function triggerPDFPrint() {
+    updatePdfDocumentTitle();
+    renderDocument();
+    setTimeout(() => {
+      window.print();
+    }, 60);
+  }
+
+  window.addEventListener('beforeprint', () => {
+    updatePdfDocumentTitle();
+  });
+
+  /* ==================== 입력 폼 및 상태 관리 ==================== */
+  function loadInitialState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_CURRENT_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        appState = { ...createDefaultState(), ...parsed };
+      }
+    } catch (e) {
+      console.warn('저장된 상태 불러오기 실패:', e);
+    }
+    syncStateToInputs();
+    renderAll();
+  }
+
+  function persistCurrentState() {
+    try {
+      localStorage.setItem(STORAGE_CURRENT_KEY, JSON.stringify(appState));
+    } catch (e) {
+      console.warn('자동 저장 실패:', e);
+    }
+  }
+
+  function syncStateToInputs() {
+    document.getElementById('businessArea').value = appState.businessArea || '';
+    document.getElementById('division').value = appState.division || '';
+    document.getElementById('businessLine').value = appState.businessLine || '';
+    document.getElementById('docSeq').value = appState.docSeq || '01';
+    document.getElementById('docNumber').value = appState.docNumber || '';
+    document.getElementById('clientName').value = appState.clientName || '';
+    document.getElementById('docDate').value = appState.docDate || getTodayString();
+    document.getElementById('projectName').value = appState.projectName || '';
+    document.getElementById('projectLocation').value = appState.projectLocation || '';
+    document.getElementById('startDate').value = appState.startDate || '';
+    document.getElementById('endDate').value = appState.endDate || '';
+    const scopeEl = document.getElementById('projectScope');
+    scopeEl.value = appState.projectScope || '';
+    autoExpandTextarea(scopeEl);
+    document.getElementById('drawingCaption').value = appState.drawingCaption || '';
+    updatePdfDocumentTitle();
+  }
+
+  function handleDocNoPartsChange() {
+    appState.division = document.getElementById('division').value.trim();
+    appState.businessLine = document.getElementById('businessLine').value.trim();
+    appState.docSeq = document.getElementById('docSeq').value.trim();
+    const divPart = appState.division || 'DIV';
+    const blPart = appState.businessLine || 'BL';
+    const seqPart = appState.docSeq || '01';
+    appState.docNumber = `ABB-${divPart}-${blPart}-HSE-${seqPart}`;
+    document.getElementById('docNumber').value = appState.docNumber;
+    handleFormChange();
+  }
+
+  function handleDocNumberManualChange() {
+    appState.docNumber = document.getElementById('docNumber').value.trim();
+    handleFormChange();
+  }
+
+  function handleFormChange() {
+    appState.businessArea = document.getElementById('businessArea').value;
+    appState.division = document.getElementById('division').value;
+    appState.businessLine = document.getElementById('businessLine').value;
+    appState.docSeq = document.getElementById('docSeq').value;
+    appState.docNumber = document.getElementById('docNumber').value;
+    appState.clientName = document.getElementById('clientName').value;
+    appState.docDate = document.getElementById('docDate').value;
+    appState.projectName = document.getElementById('projectName').value;
+    appState.projectLocation = document.getElementById('projectLocation').value;
+    appState.startDate = document.getElementById('startDate').value;
+    appState.endDate = document.getElementById('endDate').value;
+    appState.projectScope = document.getElementById('projectScope').value;
+    appState.drawingCaption = document.getElementById('drawingCaption').value;
+
+    updatePdfDocumentTitle();
+    persistCurrentState();
+    renderDocument();
+  }
+
+  function autoExpandTextarea(el) {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = (el.scrollHeight + 2) + 'px';
+  }
+
+  /* ==================== 도면 이미지 첨부 ==================== */
+  function handleDrawingUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      appState.drawingDataUrl = e.target.result;
+      if (!appState.drawingCaption) {
+        appState.drawingCaption = file.name;
+        document.getElementById('drawingCaption').value = file.name;
+      }
+      persistCurrentState();
+      renderDocument();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeDrawing() {
+    appState.drawingDataUrl = '';
+    appState.drawingCaption = '';
+    document.getElementById('drawingInput').value = '';
+    document.getElementById('drawingCaption').value = '';
+    persistCurrentState();
+    renderDocument();
+  }
+
+  /* ==================== 주요 연락처 (ABB) 관리 ==================== */
+  function renderKeyContactsInput() {
+    const tbody = document.getElementById('key-contacts-tbody');
+    tbody.innerHTML = '';
+
+    appState.keyContacts.forEach((person, idx) => {
+      const tr = document.createElement('tr');
+      const presetOptions = PRESET_STAFF.map(s =>
+        `<option value="${escapeHtml(s.name)}" ${person.name === s.name ? 'selected' : ''}>${escapeHtml(s.name)} (${escapeHtml(s.phone)})</option>`
+      ).join('');
+
+      tr.innerHTML = `
+        <td>
+          <input type="text" value="${escapeHtml(person.role)}" ${person.fixed && !person.editing ? 'disabled' : ''}
+            onchange="updateKeyContactField(${idx}, 'role', this.value)" />
+        </td>
+        <td>
+          <select onchange="applyPresetStaff(${idx}, this.value)">
+            <option value="">-- 직접 입력 / 선택 --</option>
+            ${presetOptions}
+          </select>
+        </td>
+        <td>
+          <input type="text" value="${escapeHtml(person.name)}" placeholder="성명"
+            ${!person.editing && person.name ? '' : ''}
+            oninput="updateKeyContactField(${idx}, 'name', this.value)" />
+        </td>
+        <td>
+          <input type="text" value="${escapeHtml(person.phone)}" placeholder="010-0000-0000"
+            oninput="updateKeyContactField(${idx}, 'phone', this.value)" />
+        </td>
+        <td>
+          <div class="action-cell">
+            <button type="button" class="btn btn-edit btn-sm" onclick="toggleKeyContactEdit(${idx})">${person.editing ? '완료' : '수정'}</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="deleteKeyContact(${idx})">삭제</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function applyPresetStaff(idx, staffName) {
+    if (!staffName) return;
+    const found = PRESET_STAFF.find(s => s.name === staffName);
+    if (found) {
+      appState.keyContacts[idx].name = found.name;
+      appState.keyContacts[idx].phone = found.phone;
+      persistCurrentState();
+      renderKeyContactsInput();
+      renderDocument();
+    }
+  }
+
+  function updateKeyContactField(idx, field, val) {
+    appState.keyContacts[idx][field] = val;
+    persistCurrentState();
+    renderDocument();
+  }
+
+  function toggleKeyContactEdit(idx) {
+    appState.keyContacts[idx].editing = !appState.keyContacts[idx].editing;
+    renderKeyContactsInput();
+  }
+
+  function addKeyContact() {
+    appState.keyContacts.push({ role: '엔지니어', name: '', phone: '', fixed: false, editing: true });
+    persistCurrentState();
+    renderKeyContactsInput();
+    renderDocument();
+  }
+
+  function deleteKeyContact(idx) {
+    if (appState.keyContacts.length <= 1) {
+      alert('최소 1명의 담당자 행은 유지되어야 합니다.');
+      return;
+    }
+    appState.keyContacts.splice(idx, 1);
+    persistCurrentState();
+    renderKeyContactsInput();
+    renderDocument();
+  }
+
+  /* ==================== 협력업체 관리 ==================== */
+  function renderContractorsInput() {
+    const tbody = document.getElementById('contractors-tbody');
+    tbody.innerHTML = '';
+
+    appState.contractors.forEach((c, idx) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <input type="text" value="${escapeHtml(c.company)}" placeholder="협력업체 이름"
+            ${c.editing ? '' : ''}
+            oninput="updateContractorField(${idx}, 'company', this.value)" />
+        </td>
+        <td>
+          <input type="text" value="${escapeHtml(c.name)}" placeholder="담당자 이름"
+            oninput="updateContractorField(${idx}, 'name', this.value)" />
+        </td>
+        <td>
+          <input type="text" value="${escapeHtml(c.phone)}" placeholder="010-0000-0000"
+            oninput="updateContractorField(${idx}, 'phone', this.value)" />
+        </td>
+        <td>
+          <div class="action-cell">
+            <button type="button" class="btn btn-edit btn-sm" onclick="toggleContractorEdit(${idx})">${c.editing ? '완료' : '수정'}</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="deleteContractor(${idx})">삭제</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function updateContractorField(idx, field, val) {
+    appState.contractors[idx][field] = val;
+    persistCurrentState();
+    renderDocument();
+  }
+
+  function toggleContractorEdit(idx) {
+    appState.contractors[idx].editing = !appState.contractors[idx].editing;
+    renderContractorsInput();
+  }
+
+  function addContractor() {
+    appState.contractors.push({ company: '', name: '', phone: '', editing: true });
+    persistCurrentState();
+    renderContractorsInput();
+    renderDocument();
+  }
+
+  function deleteContractor(idx) {
+    appState.contractors.splice(idx, 1);
+    persistCurrentState();
+    renderContractorsInput();
+    renderDocument();
+  }
+
+  /* ==================== 위험요소 체크리스트 모달 ==================== */
+  function renderHazardSummary() {
+    const identified = appState.hazards.filter(h => h.identified).map(h => h.name);
+    const controlled = appState.hazards.filter(h => h.controlled).map(h => h.name);
+    document.getElementById('hazard-summary-box').innerHTML = `
+      <div style="margin-bottom:4px;"><b>식별된 위험요소 (${identified.length}건):</b> ${identified.length ? escapeHtml(identified.join(', ')) : '없음'}</div>
+      <div><b>통제 조치 적용 (${controlled.length}건):</b> ${controlled.length ? escapeHtml(controlled.join(', ')) : '없음'}</div>
+    `;
+  }
+
+  function openHazardModal() {
+    const tbody = document.getElementById('hazard-modal-tbody');
+    tbody.innerHTML = '';
+    appState.hazards.forEach((h, idx) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:700;">${escapeHtml(h.name)}</td>
+        <td style="text-align:center;">
+          <input type="checkbox" style="width:16px; height:16px;" ${h.identified ? 'checked' : ''}
+            onchange="toggleHazardCheck(${idx}, 'identified', this.checked)" />
+        </td>
+        <td style="text-align:center;">
+          <input type="checkbox" style="width:16px; height:16px;" ${h.controlled ? 'checked' : ''}
+            onchange="toggleHazardCheck(${idx}, 'controlled', this.checked)" />
+        </td>
+        <td>
+          <input type="text" value="${escapeHtml(h.detail)}"
+            oninput="updateHazardDetail(${idx}, this.value)" />
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('hazard-modal').classList.add('active');
+  }
+
+  function closeHazardModal() {
+    document.getElementById('hazard-modal').classList.remove('active');
+    renderHazardSummary();
+    renderDocument();
+  }
+
+  function toggleHazardCheck(idx, field, checked) {
+    appState.hazards[idx][field] = checked;
+    persistCurrentState();
+  }
+
+  function updateHazardDetail(idx, val) {
+    appState.hazards[idx].detail = val;
+    persistCurrentState();
+  }
+
+  /* ==================== 저장된 계획서 관리 모달 & JSON 백업 ==================== */
+  function getSavedPlansList() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_SAVED_LIST_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function saveCurrentPlan() {
+    const list = getSavedPlansList();
+    const record = {
+      id: Date.now().toString(),
+      savedDate: getTodayString(),
+      data: JSON.parse(JSON.stringify(appState))
+    };
+    const existingIdx = list.findIndex(item => item.data.docNumber === appState.docNumber);
+    if (existingIdx >= 0) {
+      if (!confirm(`문서번호 [${appState.docNumber}] 계획서가 이미 존재합니다. 덮어쓰시겠습니까?`)) return;
+      list[existingIdx] = record;
+    } else {
+      list.unshift(record);
+    }
+    localStorage.setItem(STORAGE_SAVED_LIST_KEY, JSON.stringify(list));
+    alert(`[${appState.docNumber}] 계획서가 저장되었습니다.`);
+  }
+
+  function openSavedModal() {
+    renderSavedPlansTable();
+    document.getElementById('saved-modal').classList.add('active');
+  }
+
+  function closeSavedModal() {
+    document.getElementById('saved-modal').classList.remove('active');
+  }
+
+  function renderSavedPlansTable() {
+    const tbody = document.getElementById('saved-plans-tbody');
+    const list = getSavedPlansList();
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:#64748b;">저장된 Project HSE Plan이 없습니다. 상단 [계획서 저장] 버튼을 눌러 저장하세요.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = list.map((item, idx) => {
+      const d = item.data;
+      return `
+        <tr>
+          <td>
+            <div style="font-weight:800; color:#0f172a;">${escapeHtml(d.docNumber)}</div>
+            <div style="font-size:12px; color:#475569; margin-top:2px;">${escapeHtml(d.projectName)}</div>
+          </td>
+          <td style="font-size:12px;">
+            <div><b>Area:</b> ${escapeHtml(d.businessArea)}</div>
+            <div><b>Div/BL:</b> ${escapeHtml(d.division)} / ${escapeHtml(d.businessLine)}</div>
+          </td>
+          <td style="font-size:12px;">
+            <div style="font-weight:700;">${escapeHtml(d.clientName || '-')}</div>
+            <div style="color:#475569;">${escapeHtml(d.projectLocation || '-')}</div>
+          </td>
+          <td style="font-size:12px;">
+            <div>${escapeHtml(d.startDate || '-')}</div>
+            <div style="color:#475569;">~ ${escapeHtml(d.endDate || '-')}</div>
+          </td>
+          <td style="text-align:center; font-size:12px;">${escapeHtml(item.savedDate)}</td>
+          <td>
+            <div class="action-cell">
+              <button type="button" class="btn btn-primary btn-sm" onclick="loadSavedPlan(${idx})">불러오기</button>
+              <button type="button" class="btn btn-danger btn-sm" onclick="deleteSavedPlan(${idx})">삭제</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function loadSavedPlan(idx) {
+    const list = getSavedPlansList();
+    if (!list[idx]) return;
+    appState = JSON.parse(JSON.stringify(list[idx].data));
+    persistCurrentState();
+    syncStateToInputs();
+    renderAll();
+    closeSavedModal();
+  }
+
+  function deleteSavedPlan(idx) {
+    const list = getSavedPlansList();
+    if (!list[idx]) return;
+    if (!confirm(`[${list[idx].data.docNumber}] 항목을 삭제하시겠습니까?`)) return;
+    list.splice(idx, 1);
+    localStorage.setItem(STORAGE_SAVED_LIST_KEY, JSON.stringify(list));
+    renderSavedPlansTable();
+  }
+
+  function exportJSON() {
+    const cleanDocNo = sanitizeFilenamePart(appState.docNumber);
+    const blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `KR ABB HSE Plan_${cleanDocNo}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        appState = { ...createDefaultState(), ...parsed };
+        persistCurrentState();
+        syncStateToInputs();
+        renderAll();
+        alert('JSON 백업 파일이 성공적으로 복원되었습니다.');
+      } catch {
+        alert('올바른 JSON 파일이 아닙니다.');
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  function resetToDefault() {
+    if (!confirm('입력 내용을 기본 초기값으로 되돌리시겠습니까?')) return;
+    appState = createDefaultState();
+    persistCurrentState();
+    syncStateToInputs();
+    renderAll();
+  }
+
+  /* ==================== 미리보기 배율 제어 ==================== */
+  let currentZoom = 0.72;
+  function changeZoom(delta) {
+    currentZoom = Math.min(1.3, Math.max(0.4, +(currentZoom + delta).toFixed(2)));
+    applyZoom();
+  }
+
+  function fitPreviewZoom() {
+    const container = document.getElementById('preview-scroll-container');
+    if (!container) return;
+    const availableW = container.clientWidth - 40;
+    const a4PxWidth = 794; // 210mm at 96dpi
+    currentZoom = Math.min(1.1, Math.max(0.4, +(availableW / a4PxWidth).toFixed(2)));
+    applyZoom();
+  }
+
+  function applyZoom() {
+    document.documentElement.style.setProperty('--preview-scale', currentZoom);
+    document.getElementById('zoom-label').textContent = `${Math.round(currentZoom * 100)}%`;
+  }
+
+  /* ==================== 문서 렌더링 및 미리보기=인쇄 페이지 동기화 ==================== */
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function getAbbLogoSvg(width = 62) {
+    return `
+      <svg width="${width}" viewBox="0 0 120 46" xmlns="http://www.w3.org/2000/svg" aria-label="ABB Logo">
+        <g fill="#FF000F">
+          <!-- A -->
+          <path d="M16 4 L23 4 L23 22 L8 22 Z M25 4 L32 4 L40 22 L25 22 Z M6 25 L23 25 L23 34 L16 34 L13 42 L0 42 Z M25 25 L42 25 L48 42 L35 42 L32 34 L25 34 Z"/>
+          <!-- First B -->
+          <path d="M52 4 L66 4 L66 22 L52 22 Z M68 4 L76 4 C82 4 86 8 86 13.5 C86 17.5 83.5 20.5 80 22 L68 22 Z M52 25 L66 25 L66 42 L52 42 Z M68 25 L82 25 C86 27 88 30 88 34 C88 39 83 42 76 42 L68 42 Z"/>
+          <!-- Second B -->
+          <path d="M92 4 L106 4 L106 22 L92 22 Z M108 4 L116 4 C122 4 126 8 126 13.5 C126 17.5 123.5 20.5 120 22 L108 22 Z M92 25 L106 25 L106 42 L92 42 Z M108 25 L122 25 C126 27 128 30 128 34 C128 39 123 42 116 42 L108 42 Z" transform="translate(-8,0)"/>
+        </g>
+      </svg>
+    `;
+  }
+
+  function getPageHeaderHtml() {
+    return `
+      <div class="doc-header">
+        <div class="doc-header-left">ABB Korea HSE &nbsp;|&nbsp; ${escapeHtml(appState.docNumber)}</div>
+        <div class="doc-header-right">${getAbbLogoSvg(46)}</div>
+      </div>
+    `;
+  }
+
+  function getPageFooterHtml(pageNum, totalPages) {
+    return `
+      <div class="doc-footer">
+        <div>${escapeHtml(appState.docDate || getTodayString())}</div>
+        <div>${escapeHtml(appState.clientName || '')} &nbsp;|&nbsp; ${escapeHtml(appState.projectName || '')}</div>
+        <div class="page-num-label">Page ${pageNum} of ${totalPages}</div>
+      </div>
+    `;
+  }
+
+  function getPersonByRole(roleKeyword) {
+    const found = appState.keyContacts.find(c => (c.role || '').includes(roleKeyword));
+    return found || { role: roleKeyword, name: '-', phone: '-' };
+  }
+
+  function buildOrgChartSvg() {
+    const pm = getPersonByRole('프로젝트 관리자');
+    const fa = getPersonByRole('응급');
+    const hse = getPersonByRole('HSE');
+    const se = getPersonByRole('선임 엔지니어');
+    const engineers = appState.keyContacts.filter(c => c.role === '엔지니어');
+    while (engineers.length < 4) {
+      engineers.push({ role: '엔지니어', name: '', phone: '' });
+    }
+    const eng4 = engineers.slice(0, 4);
+
+    function boxSvg(x, y, w, title, name, phone) {
+      return `
+        <g transform="translate(${x}, ${y})">
+          <text x="${w/2}" y="-4" text-anchor="middle" font-size="10" font-weight="700" fill="#003399">${escapeHtml(title)}</text>
+          <rect x="0" y="0" width="${w}" height="38" fill="#ffffff" stroke="#111111" stroke-width="1.2"/>
+          <line x1="0" y1="19" x2="${w}" y2="19" stroke="#111111" stroke-width="1"/>
+          <text x="${w/2}" y="13" text-anchor="middle" font-size="10" font-weight="700" fill="#000000">${escapeHtml(name || '-')}</text>
+          <text x="${w/2}" y="32" text-anchor="middle" font-size="9.5" font-weight="600" fill="#222222">${escapeHtml(phone || '-')}</text>
+        </g>
+      `;
+    }
+
+    return `
+      <svg width="100%" viewBox="0 0 680 215" xmlns="http://www.w3.org/2000/svg" style="display:block; margin: 2mm auto;">
+        <!-- 연결선 -->
+        <line x1="340" y1="54" x2="340" y2="122" stroke="#111111" stroke-width="1.2"/>
+        <line x1="340" y1="84" x2="505" y2="84" stroke="#111111" stroke-width="1.2"/>
+        <line x1="340" y1="160" x2="340" y2="173" stroke="#111111" stroke-width="1.2"/>
+        <line x1="88" y1="173" x2="592" y2="173" stroke="#111111" stroke-width="1.2"/>
+        <line x1="88" y1="173" x2="88" y2="184" stroke="#111111" stroke-width="1.2"/>
+        <line x1="256" y1="173" x2="256" y2="184" stroke="#111111" stroke-width="1.2"/>
+        <line x1="424" y1="173" x2="424" y2="184" stroke="#111111" stroke-width="1.2"/>
+        <line x1="592" y1="173" x2="592" y2="184" stroke="#111111" stroke-width="1.2"/>
+
+        ${boxSvg(255, 16, 170, '프로젝트 관리자', pm.name, pm.phone)}
+        ${boxSvg(15, 65, 160, '응급처치 담당자', fa.name, fa.phone)}
+        ${boxSvg(505, 65, 160, 'HSE 담당자', hse.name, hse.phone)}
+        ${boxSvg(255, 122, 170, '선임 엔지니어', se.name, se.phone)}
+
+        ${boxSvg(13, 184, 150, eng4[0].role, eng4[0].name, eng4[0].phone)}
+        ${boxSvg(181, 184, 150, eng4[1].role, eng4[1].name, eng4[1].phone)}
+        ${boxSvg(349, 184, 150, eng4[2].role, eng4[2].name, eng4[2].phone)}
+        ${boxSvg(517, 184, 150, eng4[3].role, eng4[3].name, eng4[3].phone)}
+      </svg>
+    `;
+  }
+
+  function buildIncidentFlowchartSvg() {
+    return `
+      <svg width="100%" viewBox="0 0 700 185" xmlns="http://www.w3.org/2000/svg" style="display:block; margin: 2mm 0;">
+        <!-- 배경 박스 -->
+        <rect x="4" y="4" width="692" height="122" rx="12" fill="#e5e7eb" stroke="#9ca3af" stroke-width="1"/>
+        <text x="16" y="20" font-size="10" font-weight="800" fill="#dc2626">MTC / RWC / LTI / SI / HPI / Fatal</text>
+
+        <!-- 24시간 점선 구역 -->
+        <rect x="10" y="26" width="388" height="94" rx="10" fill="#e7d69b" stroke="#111111" stroke-width="1.5" stroke-dasharray="5,4"/>
+        <text x="20" y="41" font-size="9.5" font-weight="800" fill="#1d4ed8">Near miss / First aid</text>
+
+        <!-- 노드들 -->
+        <g transform="translate(18, 52)">
+          <rect width="108" height="44" fill="#ffffff" stroke="#111111" stroke-width="1.2"/>
+          <text x="54" y="19" text-anchor="middle" font-size="9" font-weight="700">Injured person /</text>
+          <text x="54" y="32" text-anchor="middle" font-size="9" font-weight="700">Person in charge</text>
+        </g>
+
+        <g transform="translate(148, 52)">
+          <rect width="96" height="44" fill="#ffffff" stroke="#111111" stroke-width="1.2"/>
+          <text x="48" y="25" text-anchor="middle" font-size="9.5" font-weight="700">Line Manager</text>
+        </g>
+
+        <g transform="translate(274, 34)">
+          <rect width="112" height="36" fill="#ffffff" stroke="#111111" stroke-width="1.2"/>
+          <text x="56" y="16" text-anchor="middle" font-size="9" font-weight="700">Local Division</text>
+          <text x="56" y="28" text-anchor="middle" font-size="9" font-weight="700">HSE</text>
+        </g>
+
+        <g transform="translate(274, 78)">
+          <rect width="112" height="36" fill="#ffffff" stroke="#111111" stroke-width="1.2"/>
+          <text x="56" y="16" text-anchor="middle" font-size="9" font-weight="700">Local Division</text>
+          <text x="56" y="28" text-anchor="middle" font-size="9" font-weight="700">Manager</text>
+        </g>
+
+        <g transform="translate(422, 34)">
+          <rect width="112" height="36" fill="#ffffff" stroke="#111111" stroke-width="1.2"/>
+          <text x="56" y="16" text-anchor="middle" font-size="9" font-weight="700">Country</text>
+          <text x="56" y="28" text-anchor="middle" font-size="9" font-weight="700">HSE Manager</text>
+        </g>
+
+        <g transform="translate(566, 34)">
+          <rect width="112" height="36" fill="#ffffff" stroke="#111111" stroke-width="1.2"/>
+          <text x="56" y="22" text-anchor="middle" font-size="9.5" font-weight="700">CHO / CMD</text>
+        </g>
+
+        <!-- 마름모 노드 -->
+        <polygon points="622,74 686,96 622,118 558,96" fill="#ffffff" stroke="#111111" stroke-width="1.2"/>
+        <text x="622" y="93" text-anchor="middle" font-size="8.5" font-weight="700">Division Mgr</text>
+        <text x="622" y="104" text-anchor="middle" font-size="8.5" font-weight="700">Division HSE Mgr</text>
+
+        <!-- 화살표 -->
+        <line x1="126" y1="74" x2="146" y2="74" stroke="#111111" stroke-width="1.2"/>
+        <polygon points="148,74 142,71 142,77" fill="#111111"/>
+
+        <line x1="244" y1="66" x2="272" y2="52" stroke="#111111" stroke-width="1.2"/>
+        <polygon points="274,52 267,51 270,57" fill="#111111"/>
+
+        <line x1="244" y1="82" x2="272" y2="96" stroke="#111111" stroke-width="1.2"/>
+        <polygon points="274,96 270,91 267,97" fill="#111111"/>
+
+        <line x1="386" y1="52" x2="420" y2="52" stroke="#111111" stroke-width="1.2"/>
+        <polygon points="422,52 416,49 416,55" fill="#111111"/>
+
+        <line x1="534" y1="52" x2="564" y2="52" stroke="#111111" stroke-width="1.2"/>
+        <polygon points="566,52 560,49 560,55" fill="#111111"/>
+
+        <line x1="386" y1="96" x2="556" y2="96" stroke="#111111" stroke-width="1.2"/>
+        <polygon points="558,96 552,93 552,99" fill="#111111"/>
+
+        <!-- 하단 타임라인 -->
+        <line x1="10" y1="142" x2="395" y2="142" stroke="#111111" stroke-width="1.3"/>
+        <line x1="403" y1="142" x2="690" y2="142" stroke="#111111" stroke-width="1.3"/>
+        <line x1="398" y1="134" x2="398" y2="150" stroke="#111111" stroke-width="2"/>
+        <line x1="401" y1="134" x2="401" y2="150" stroke="#111111" stroke-width="2"/>
+
+        <text x="202" y="137" text-anchor="middle" font-size="9.5" font-weight="800" fill="#dc2626">24 hours notification</text>
+        <text x="546" y="137" text-anchor="middle" font-size="9.5" font-weight="800" fill="#dc2626">Immediate notification</text>
+        <text x="546" y="153" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">SI, HPI: F1, Fatal: F2 notification form</text>
+
+        <rect x="4" y="162" width="692" height="20" fill="#e5e7eb" stroke="#9ca3af" stroke-width="0.8"/>
+        <text x="350" y="175" text-anchor="middle" font-size="9.5" font-weight="800" fill="#111111">
+          Share learning slide – <tspan fill="#dc2626">72 hours</tspan> &nbsp;&nbsp;/&nbsp;&nbsp; Major &amp; Medium incident investigation Report – <tspan fill="#dc2626">1 month</tspan>
+        </text>
+      </svg>
+    `;
+  }
+
+  function renderDocument() {
+    const pm = getPersonByRole('프로젝트 관리자');
+    const hse = getPersonByRole('HSE');
+    const se = getPersonByRole('선임 엔지니어');
+    const fa = getPersonByRole('응급');
+    const client = appState.clientName || '고객사';
+
+    const pagesHtml = [];
+
+    /* -------------------- PAGE 1: 표지 -------------------- */
+    pagesHtml.push(`
+      <div class="a4-page" data-page-index="1">
+        <div class="page-body">
+          <div class="cover-top-grid">
+            <div>
+              <div class="cover-company">ABB Ltd., Korea</div>
+              <table class="cover-dept-table">
+                <tr><td class="cover-dept-label">Business Area :</td><td class="cover-dept-val">${escapeHtml(appState.businessArea)}</td></tr>
+                <tr><td class="cover-dept-label">Division :</td><td class="cover-dept-val">${escapeHtml(appState.division)}</td></tr>
+                <tr><td class="cover-dept-label">Business Line :</td><td class="cover-dept-val">${escapeHtml(appState.businessLine)}</td></tr>
+              </table>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:10pt; font-weight:800; margin-bottom:2mm;">ABB Korea HSE</div>
+              ${getAbbLogoSvg(74)}
+            </div>
+          </div>
+
+          <div class="cover-title-block">
+            <h1 class="cover-main-title">ABB 안전보건관리 계획서</h1>
+            <p class="cover-sub-title">Project Health, Safety &amp; Environment (HSE) Plan</p>
+          </div>
+
+          <!-- 프로젝트 정보 표 (프로젝트 이름 칼럼 확대 / 프로젝트 책임자 칼럼 축소) -->
+          <table class="cover-info-table">
+            <colgroup>
+              <col style="width:20%;" />
+              <col style="width:45%;" />
+              <col style="width:17%;" />
+              <col style="width:18%;" />
+            </colgroup>
+            <tr>
+              <th>프로젝트 이름 :</th>
+              <td style="font-weight:800; font-size:10.5pt;">${escapeHtml(appState.projectName)}</td>
+              <th>프로젝트 책임자 :</th>
+              <td style="font-weight:700; text-align:center;">${escapeHtml(pm.name || '-')}</td>
+            </tr>
+            <tr>
+              <th>프로젝트 위치 :</th>
+              <td>${escapeHtml(appState.projectLocation)}</td>
+              <th>문서 No. :</th>
+              <td style="font-weight:800; text-align:center; color:#b91c1c;">${escapeHtml(appState.docNumber)}</td>
+            </tr>
+            <tr>
+              <th>프로젝트 시작일 :</th>
+              <td>${escapeHtml(appState.startDate)}</td>
+              <th>고객사 :</th>
+              <td style="text-align:center; font-weight:700;">${escapeHtml(appState.clientName)}</td>
+            </tr>
+            <tr>
+              <th>프로젝트 종료일 :</th>
+              <td>${escapeHtml(appState.endDate)}</td>
+              <th>작성일자 :</th>
+              <td style="text-align:center;">${escapeHtml(appState.docDate)}</td>
+            </tr>
+          </table>
+
+          <table class="cover-sign-table">
+            <colgroup>
+              <col style="width:33.3%;" />
+              <col style="width:33.3%;" />
+              <col style="width:33.4%;" />
+            </colgroup>
+            <tr>
+              <th>작성 (프로젝트 관리자)</th>
+              <th>검토 (선임 엔지니어)</th>
+              <th>확인 (HSE 담당자)</th>
+            </tr>
+            <tr>
+              <td class="cover-sign-box">${escapeHtml(pm.name || '-')}</td>
+              <td class="cover-sign-box">${escapeHtml(se.name || '-')}</td>
+              <td class="cover-sign-box">${escapeHtml(hse.name || '-')}</td>
+            </tr>
+          </table>
+        </div>
+        ${getPageFooterHtml(1, 10)}
+      </div>
+    `);
+
+    /* -------------------- PAGE 2: 목차 -------------------- */
+    pagesHtml.push(`
+      <div class="a4-page" data-page-index="2">
+        ${getPageHeaderHtml()}
+        <div class="page-body">
+          <div class="toc-title">목차 (Table of Contents)</div>
+          <div class="toc-columns">
+            <div>
+              <div class="toc-section">1 프로젝트 정의</div>
+              <div class="toc-item">1.1 서론</div>
+              <div class="toc-item">1.2 문서</div>
+              <div class="toc-item">1.3 프로젝트 요약 및 범위</div>
+              <div class="toc-item">1.4 주요 단계 일정</div>
+              <div class="toc-item">1.5 설치 및 서비스 도면/단선도</div>
+
+              <div class="toc-section">2 정책 및 목표</div>
+              <div class="toc-item">2.1 일반</div>
+              <div class="toc-item">2.2 고객 정책 요구 사항</div>
+              <div class="toc-item">2.3 보건, 안전 및 환경 목적</div>
+              <div class="toc-item">2.4 보건, 안전 및 환경 목표</div>
+              <div class="toc-item">2.5 보건, 안전 및 환경 목표 (KPI)</div>
+
+              <div class="toc-section">3 구조, 조직, 역할 및 책임</div>
+              <div class="toc-item">3.1 프로젝트 HSE 조직</div>
+              <div class="toc-item">3.2 프로젝트 관리자/감독 - 보건 및 안전에 대한 전반적인 책임 및 역할</div>
+              <div class="toc-item">3.3 HSE 담당자</div>
+
+              <div class="toc-section">4 위험 요소 식별 및 위험성 평가</div>
+              <div class="toc-item">4.1 프로젝트 팀의 책임</div>
+              <div class="toc-item">4.2 잠재 및 잔류 위험요소</div>
+              <div class="toc-item">4.3 비상사태 대비 및 대응 (SA-M-10)</div>
+              <div class="toc-item">4.4 복지 &amp; 응급 처치 (SA-S-000-01-01)</div>
+              <div class="toc-item">4.5 작업 허가서</div>
+            </div>
+
+            <div>
+              <div class="toc-section">5 협력업체 관리 (SA-S-005)</div>
+              <div class="toc-item">5.1 일반</div>
+              <div class="toc-item">5.2 협력업체 관리 요구사항</div>
+
+              <div class="toc-section">6 의사소통 &amp; 협의</div>
+              <div class="toc-item">6.1 일반</div>
+              <div class="toc-item">6.2 정보</div>
+              <div class="toc-item">6.3 HSE 서류</div>
+              <div class="toc-item">6.4 프로젝트 의사소통 계획</div>
+              <div class="toc-item">6.5 작업자 상담</div>
+              <div class="toc-item">6.6 사고 보고 과정</div>
+              <div class="toc-item">6.8 사고 보고 요구사항</div>
+
+              <div class="toc-section">7 자원</div>
+              <div class="toc-item">7.1 일반</div>
+              <div class="toc-item">7.2 폐기물 관리 (SA-S-203)</div>
+
+              <div class="toc-section">8 교육 &amp; 역량</div>
+              <div class="toc-item">8.1 일반</div>
+              <div class="toc-item">8.2 현장 신규자 교육 (Induction)</div>
+              <div class="toc-item">8.3 특별 교육</div>
+
+              <div class="toc-section">9 모니터링, 감사, 시정 조치 및 검토</div>
+              <div class="toc-item">9.1 상태 모니터링 및 프로젝트 모니터링 계획</div>
+
+              <div class="toc-section">10 프로젝트 종료</div>
+              <div class="toc-section">11 정의 &amp; 약어</div>
+            </div>
+          </div>
+        </div>
+        ${getPageFooterHtml(2, 10)}
+      </div>
+    `);
+
+    /* -------------------- PAGE 3: 1. 프로젝트 정의 -------------------- */
+    const keyContactsRows = appState.keyContacts.map(c => `
+      <tr>
+        <td class="text-bold">${escapeHtml(c.role)}</td>
+        <td class="text-center">${escapeHtml(c.name || '-')}</td>
+        <td class="text-center">${escapeHtml(c.phone || '-')}</td>
+      </tr>
+    `).join('');
+
+    const contractorRows = appState.contractors.length
+      ? appState.contractors.map(c => `
+          <tr>
+            <td class="text-bold">${escapeHtml(c.company || '-')}</td>
+            <td class="text-center">${escapeHtml(c.name || '-')}</td>
+            <td class="text-center">${escapeHtml(c.phone || '-')}</td>
+          </tr>
+        `).join('')
+      : `<tr><td colspan="3" class="text-center">해당 사항 없음</td></tr>`;
+
+    pagesHtml.push(`
+      <div class="a4-page" data-page-index="3">
+        ${getPageHeaderHtml()}
+        <div class="page-body">
+          <div class="sec-h1">1 프로젝트 정의</div>
+          <div class="sec-h2">1.1 서론 (Documentation of Contract No: ${escapeHtml(appState.docNumber)})</div>
+          <p class="doc-p">본 보건, 안전 및 환경 계획(이하 '프로젝트 안전보건관리 계획서')은 해당 지역 요구사항, ABB 보건, 안전 및 환경 (HSE) 요구사항/표준, ISO 45001, ISO 14001 및 클라이언트(HSE) 요구사항을 준수하여 작성되었습니다. 본 문서는 공사 전 보건, 안전 및 환경 계획에 포함된 정보를 고려하여 작성되었습니다.</p>
+          <p class="doc-p">ABB는 프로젝트에 고용된 모든 사람들의 건강과 안전을 가장 중요하게 여깁니다. 이를 위해 본 프로젝트 기간 동안 당사와 협력업체 직원, 고객사 및 현장 방문자 모두에게 안전하고 건강한 작업 환경을 제공하기 위해 합리적으로 실행 가능한 모든 노력을 기울일 것입니다.</p>
+          <p class="doc-p">프로젝트 안전보건관리 계획서의 목적은 다음과 같습니다:</p>
+          <ul class="doc-ul">
+            <li>모든 위험 요소의 대책을 위한 명령 계통을 설정하고 정의하며 프로젝트 실행 중 개별 위험 예방 및 안전 홍보 책임을 정의합니다.</li>
+            <li>작업 범위 내에서 위험 작업을 식별하고 관련 위험을 완화하는 통합 예방 조치를 명시합니다.</li>
+          </ul>
+          <p class="doc-p">프로젝트 안전보건관리 계획서는 프로젝트 단계, 계약자 관리의 변경 사항, 범위 및 사고와 점검을 통해 얻은 변경 사항을 반영하기 위해 지속적으로 업데이트되는 동적 문서로 간주되어야 합니다. 모든 변경사항 및 업데이트 내용은 ABB, 고객사 및 협력업체 직원에게 공식적으로 공유됩니다.</p>
+
+          <div class="sec-h2">1.2 문서</div>
+          <p class="doc-p">계약 번호 <b>${escapeHtml(appState.docNumber)}</b>에 대한 문서와 요구 사항 관련 문서 및 기록은 현장에서 HSE 파일로 사용할 수 있도록 유지되어야 합니다. HSE 계획 및 기타 관련 HSE 문서는 프로젝트 종료 후 3년 동안 보관해야 합니다.</p>
+
+          <div class="sec-h2">1.3 프로젝트 요약 및 범위</div>
+          <div class="scope-box">${escapeHtml(appState.projectScope)}</div>
+
+          <div class="sec-h2">1.4 주요 단계 일정 및 주요 연락처</div>
+          <table class="doc-table">
+            <tr>
+              <th style="width:22%;">프로젝트 시작일</th>
+              <td style="width:28%;" class="text-center text-bold">${escapeHtml(appState.startDate)}</td>
+              <th style="width:22%;">프로젝트 종료일</th>
+              <td style="width:28%;" class="text-center text-bold">${escapeHtml(appState.endDate)}</td>
+            </tr>
+          </table>
+
+          <div style="display:grid; grid-template-columns: 1.15fr 0.85fr; gap: 4mm;">
+            <div>
+              <div class="sec-h3">주요 연락처 - ABB</div>
+              <table class="doc-table">
+                <thead>
+                  <tr><th style="width:38%;">직책</th><th style="width:28%;">이름</th><th style="width:34%;">연락처</th></tr>
+                </thead>
+                <tbody>${keyContactsRows}</tbody>
+              </table>
+            </div>
+            <div>
+              <div class="sec-h3">협력업체</div>
+              <table class="doc-table">
+                <thead>
+                  <tr><th style="width:38%;">협력업체 이름</th><th style="width:28%;">이름</th><th style="width:34%;">연락처</th></tr>
+                </thead>
+                <tbody>${contractorRows}</tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="sec-h2">1.5 설치 및 서비스 도면/단선도</div>
+          <p class="doc-p">유틸리티는 증기, 압축 공기 및 관련 공급 배관/덕트와 전기, 가스, 수도, 빗물 배수, 오수 및 통신 서비스와 같은 지하 매설물로 정의할 수 있습니다. 확실하게 확인되지 않는 한, 지하 매설물이 존재한다고 가정하고 작업을 진행해야 합니다. ABB와 협력업체는 설치에 필요한 모든 도면의 사본을 제공하며, 작업 전과 작업 중 모든 변경 사항을 기록하여 준공도면의 일부로 편집합니다.</p>
+          ${appState.drawingDataUrl ? `
+            <div class="drawing-box">
+              <img src="${appState.drawingDataUrl}" alt="설치 및 서비스 도면" />
+              ${appState.drawingCaption ? `<div style="font-size:7.8pt; color:#333; margin-top:1mm;">${escapeHtml(appState.drawingCaption)}</div>` : ''}
+            </div>
+          ` : ''}
+        </div>
+        ${getPageFooterHtml(3, 10)}
+      </div>
+    `);
+
+    /* -------------------- PAGE 4: 2. 정책 및 목표 -------------------- */
+    pagesHtml.push(`
+      <div class="a4-page" data-page-index="4">
+        ${getPageHeaderHtml()}
+        <div class="page-body">
+          <div class="sec-h1">2 정책 및 목표</div>
+          <div class="sec-h2">2.1 일반</div>
+          <p class="doc-p">ABB는 직원의 건강, 안전 및 복지를 보장하기 위해 최선을 다합니다. 합리적으로 실행 가능한 한, 우리의 활동에 영향을 받을 수 있는 ABB 직원이 아닌 계약자에 대한 책임 또한 전적으로 받아들입니다. 우리는 법적 의무와 계약자의 의무가 항상 충족되도록 조치를 취할 것입니다.</p>
+
+          <div class="sec-h3">2.1.1 ABB 정책 및 8 Life Saving Rules</div>
+          <ul class="doc-ul">
+            <li><b>SA-A-01</b> 보건, 안전, 환경, 보안 및 지속가능성에 관한 정책 / <b>SA-A-02</b> 사회 정책 / <b>SA-A-03</b> 인권정책</li>
+          </ul>
+          <p class="doc-p">ABB는 사망자 및 중대재해로 발전 가능성이 높은 사고를 사전에 제거하고 위험에 처할 때 작업을 중지할 수 있도록 <b>8 Life Saving Rules</b>를 준수합니다:</p>
+          <ol class="doc-ul" style="padding-left:5mm;">
+            <li>나는 모든 전기 공사에 7단계 작업안전(7 Steps)을 적용한다.</li>
+            <li>나는 적절하게 보호되는 기계만 사용한다.</li>
+            <li>나는 높은 곳에서 추락 하는 것을 방지한다.</li>
+            <li>나는 인양물로부터 안전 거리를 유지한다.</li>
+            <li>나는 항상 안전벨트를 착용한다.</li>
+            <li>나는 운전대를 잡으며 절대 핸드폰을 사용하지 않는다.</li>
+            <li>락아웃 태그아웃: 나는 1인 1 자물쇠, 1열쇠를 사용한다.</li>
+            <li>나는 밀폐공간 진입 전 산소농도가 충분한지 확인한다.</li>
+          </ol>
+
+          <div class="sec-h2">2.2 고객 정책 요구 사항</div>
+          <p class="doc-p">고용된 모든 사람의 건강과 안전을 가장 중요하게 여기는 것이 <b>${escapeHtml(client)}</b>의 정책입니다. 프로젝트는 현재의 건강, 안전 및 환경 법규와 위험, 질병 예방 및 환경에 대한 영향의 예방 하에서 합리적으로 실행 가능한 한, 모든 ABB 직원 및 계약자의 건강과 안전에 대한 위험이 제거되거나 허용 가능한 수준으로 감소되는 방식으로 진행될 것입니다.</p>
+
+          <div class="sec-h2">2.3 보건, 안전 및 환경 목적</div>
+          <ul class="doc-ul">
+            <li>안전사고 Zero 및 환경 사고 Zero 달성 / 모든 HSE KPI(목표)에 대한 최고 등급 달성</li>
+            <li>관리자의 안전에 대한 가시적인 약속, 근로자 참여, 효과적인 커뮤니케이션·협의 및 교육을 통한 긍정적 안전 문화 장려</li>
+            <li>불안전한 행동 및 상태 보고 장려 및 모든 사고 보고에 있어 비난 및 처벌 없는 문화 조성</li>
+          </ul>
+
+          <div class="sec-h2">2.4 보건, 안전 및 환경 목표</div>
+          <ul class="doc-ul">
+            <li>프로젝트 안전보건관리 계획서를 통해 위험성 평가 프로세스를 적용하여 위험 식별 및 통제에 체계적으로 접근합니다.</li>
+            <li>직원, 고객, 계약자 및 주변 사람들의 건강과 안전 위험 및 환경 위험을 줄이는 데 필요한 자원과 안전한 작업 시스템을 보장합니다.</li>
+            <li>프로젝트 안전보건관리 계획서의 효과를 정기적으로 검토·모니터링·감사하고 업데이트 시 관련 당사자에게 효과적으로 전달합니다.</li>
+          </ul>
+
+          <div class="sec-h2">2.5 보건, 안전 및 환경 목표 (KPI)</div>
+          <table class="doc-table">
+            <thead>
+              <tr><th style="width:32%;">항목</th><th style="width:68%;">목표 및 실행 기준</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="text-bold">1) 사고 보고</td><td>사고 보고 계획에 따라 모든 관련 보고서를 신속하게 제출</td></tr>
+              <tr><td class="text-bold">2) SOTS</td><td>매월 1번 프로젝트 관리자에 의해 실시</td></tr>
+              <tr><td class="text-bold">3) Toolbox</td><td>매일 작업 시작 시 수행</td></tr>
+              <tr><td class="text-bold">4) LTI</td><td>근로 손실 재해 방지 (Zero LTI)</td></tr>
+              <tr><td class="text-bold">5) 위험요소보고 (Hazard Reporting)</td><td>직원당 최소 2개 및 보고된 위험요소의 100% 해결을 위해 노력</td></tr>
+              <tr><td class="text-bold">6) 점검 &amp; 내부평가</td><td>모니터링 일정에 따라 사업부서장 및 프로젝트 관리자는 제기된 부적합 사항을 적시에 종료</td></tr>
+              <tr><td class="text-bold">7) SOT / Hazard report 종결</td><td>위험 수준에 따라 즉시 또는 신속하게 위험요소 종결</td></tr>
+            </tbody>
+          </table>
+        </div>
+        ${getPageFooterHtml(4, 10)}
+      </div>
+    `);
+
+    /* -------------------- PAGE 5: 3. 구조, 조직, 역할 및 책임 & 4.1 -------------------- */
+    pagesHtml.push(`
+      <div class="a4-page" data-page-index="5">
+        ${getPageHeaderHtml()}
+        <div class="page-body">
+          <div class="sec-h1">3 구조, 조직, 역할 및 책임</div>
+          <div class="sec-h2">3.1 프로젝트에 대한 HSE 조직 (조직도)</div>
+          ${buildOrgChartSvg()}
+
+          <div class="sec-h2">3.2 프로젝트 관리자 / 감독 - 보건 및 안전에 대한 전반적인 책임</div>
+          <p class="doc-p">프로젝트에 지정된 프로젝트 관리자는 <b>${escapeHtml(pm.name || '-')}</b>입니다. 프로젝트 관리자는 모든 활동의 건강, 안전 및 환경 관리를 포함한 프로젝트의 모든 측면에 대한 전반적인 책임이 있습니다.</p>
+          <ul class="doc-ul">
+            <li>SA-A-01 건강, 안전, 환경, 보안 및 지속 가능성에 대한 정책의 약속을 달성하기 위해 조직적 준비, 역량 및 자원이 마련되어 있는지 확인할 책임이 있습니다.</li>
+            <li>프로젝트의 모든 활동에 대해 정의된 책임을 포함하여 HSE를 관리하기 위한 비즈니스 수준 준비를 수립하고 전달합니다.</li>
+            <li>프로젝트 팀이 HSE에 대해 적절한 역할을 하도록 하며, 보건·안전 및 환경 문제와 관련하여 항상 HSE 관리자와 상의하고 협력합니다.</li>
+            <li>모든 관련 HSE 문서 및 커뮤니케이션을 관련 담당자에게 전달하고, 법률·고객 요구 사항 및 ABB 표준을 사전에 준수합니다.</li>
+            <li>프로젝트 라이프사이클의 모든 단계에서 HSE 요구사항을 고려합니다(사전계약부터 프로젝트 종료까지).</li>
+          </ul>
+
+          <div class="sec-h2">3.3 HSE 담당자</div>
+          <p class="doc-p">프로젝트의 HSE 담당자는 <b>${escapeHtml(hse.name || '-')}</b>입니다. HSE 관리자는 보건, 안전, 환경 측면 및 보안에 대한 기능적인 감독, 지시, 안내를 제공할 의무가 있으며 법적, 계약적, ABB 관리적 요구사항 및 HSE 표준에 따른 프로젝트 실행에 중점을 둡니다.</p>
+          <ul class="doc-ul">
+            <li>모든 HSE 활동에 관한 모니터링, 수행 평가 및 보고</li>
+            <li>프로젝트별 문서 검토 프로세스에 따라 모든 HSE 문서 검토 (준수되지 않는 한 어떠한 작업 활동도 수행 불가)</li>
+            <li>HSE 요구사항 준수 여부 모니터링, 부적합 사항 처리 및 필수 안전 기록부(사고 기록부, 비계·인양도구 점검 기록부 등)와 HSE 파일 관리</li>
+            <li>프로젝트의 HSE 성과, 규정 준수 및 시정 조치를 결정하기 위한 정기적인 HSE 점검/감사 실시</li>
+          </ul>
+
+          <div class="sec-h1">4 위험요소 식별 및 위험성 평가</div>
+          <div class="sec-h2">4.1 프로젝트 팀의 책임</div>
+          <ul class="doc-ul">
+            <li>프로젝트 시작부터 시운전 및 인계, 향후 운영 및 유지보수에 이르기까지 각 단계의 환경·보건·안전 위험요소 및 위험성을 식별하고 평가합니다.</li>
+            <li>위험성 평가 프로세스에서 설계를 통한 위험 회피에 중점을 두고 적절한 위험 완화 조치를 식별하며 정기·비정기적 모든 활동에 적용합니다.</li>
+            <li>위험성 평가는 ABB 직원, 협력업체 및 하위 협력업체, 고객사 대표자, 방문객을 포함하여 현장에 접근하는 모든 사람을 포함해야 합니다.</li>
+            <li>비정상적이거나 저하된 조건 발생 시 적절한 비상 조치를 식별하고 고객사의 기존 비상 계획에 미치는 영향을 평가합니다.</li>
+          </ul>
+        </div>
+        ${getPageFooterHtml(5, 10)}
+      </div>
+    `);
+
+    /* -------------------- PAGE 6: 4.2 잔류 위험요소 & 4.3 ~ 4.5 -------------------- */
+    const hazardRowsHtml = appState.hazards.map(h => `
+      <tr>
+        <td class="text-bold">${escapeHtml(h.name)}</td>
+        <td class="text-center text-bold">${h.identified ? 'V' : ''}</td>
+        <td class="text-center text-bold">${h.controlled ? 'V' : ''}</td>
+        <td>${escapeHtml(h.detail)}</td>
+      </tr>
+    `).join('');
+
+    pagesHtml.push(`
+      <div class="a4-page" data-page-index="6">
+        ${getPageHeaderHtml()}
+        <div class="page-body">
+          <div class="sec-h2" style="margin-top:0;">4.2 잔류 위험요소</div>
+          <p class="doc-p">다음은 프로젝트에 존재할 수 있는 예측 가능한 위험요소에 대한 위험성 평가입니다.</p>
+          <table class="doc-table" style="font-size:7.6pt; line-height:1.22;">
+            <thead>
+              <tr>
+                <th style="width:19%;">위험요소</th>
+                <th style="width:9%;">식별된<br/>위험요소</th>
+                <th style="width:8%;">통제<br/>조치</th>
+                <th style="width:64%;">통제 조치 세부 내용</th>
+              </tr>
+            </thead>
+            <tbody>${hazardRowsHtml}</tbody>
+          </table>
+
+          <div class="sec-h2">4.3 비상사태 대비 및 대응 (SA-M-10)</div>
+          <p class="doc-p">ABB는 안전한 작업현장을 제공하기 위해 비상사태 대비 및 대응 계획(SA-M-10-01)을 작성하여 현장에 전달합니다. 모든 인원은 화재 위험을 사전에 제거할 책임이 있으며 ABB/협력업체는 다음을 수행합니다:</p>
+          <ul class="doc-ul">
+            <li>화재 경보 프로세스, 화재감지·소방설비, 화재 대피 경로 및 비상 조명 유지, 현장 내 모든 직원 및 방문자 최신 리스트 유지</li>
+            <li>화기 작업 허가(SA-S-020) 발행(고객사 표준 우선, 없을 시 ABB 프로젝트 관리자 또는 선임엔지니어 발급) 및 협력업체 화재감시인 임명</li>
+            <li>임명된 화재감시인은 대피 경로 확인, 외부 비상대피 집결지 인원 집결 지원, 실종자/위치/화재 유형 상급자 및 긴급 구조대 연락 수행</li>
+            <li>회사 금연 정책 준수 감독 및 필요 시 긴급 구조대 연락</li>
+          </ul>
+
+          <div class="sec-h2">4.4 복지 &amp; 응급 처치 (SA-S-000-01-01)</div>
+          <p class="doc-p">프로젝트의 응급 처치 담당자는 <b>${escapeHtml(fa.name || '-')}</b>입니다. 현장 인원 2~50명당 최소 1명의 응급처치 훈련을 받은 응급 처치 담당자가 배치되며(이후 50명당 1명 추가), 모든 부상은 즉시 치료 및 기록 유지되어야 합니다.</p>
+
+          <div class="sec-h2">4.5 작업 허가 (PTW)</div>
+          <p class="doc-p">화기, 전기, 밀폐공간 등을 포함하는 작업은 작업허가서(PTW)에 따라 수행하고 책임 ABB HSE 담당자가 승인하여야 하며, 최소 ABB HSE 표준(SA-S-001) 요구사항에 부합하여야 합니다.</p>
+        </div>
+        ${getPageFooterHtml(6, 10)}
+      </div>
+    `);
+
+    /* -------------------- PAGE 7: 5. 협력업체 관리 & 6.1 ~ 6.3 -------------------- */
+    pagesHtml.push(`
+      <div class="a4-page" data-page-index="7">
+        ${getPageHeaderHtml()}
+        <div class="page-body">
+          <div class="sec-h1">5 협력업체 관리 (SA-S-005)</div>
+          <div class="sec-h2">5.1 일반</div>
+          <p class="doc-p">모든 협력업체의 관리자 및 감독자는 ABB HSE 표준에 명시된 모든 HSE 요구사항이 감독 하에 있는 모든 직원에게 전달되고 준수되도록 할 책임이 있습니다. 협력업체에 대한 높은 수준의 통제를 보장하기 위해 다음과 같은 핵심 조치가 수행됩니다:</p>
+          <ul class="doc-ul">
+            <li>잠재적 협력업체는 임명 전에 협력업체 설문지 작성과 ABB 교차 기능 팀(cross functional team)의 평가 및 승인을 통해 역량을 검증받아야 합니다.</li>
+            <li>ABB는 승인된 공급업체 목록을 유지 관리하고 품질, HSE, 운영 및 비용 대비 가치 관점에서 정기적으로 평가합니다.</li>
+            <li>관련 문서, 양식 및 파일을 포함하는 프로젝트 안전보건관리 계획서는 잠재적 협력업체에 전달되며, 모든 하위 협력업체는 보험과 법인 등기부를 제출해야 합니다.</li>
+            <li>협력업체는 ABB 현장 소개 교육을 통해 요구사항을 이해하고, 활동 기반 위험 평가 및 작업절차서(RAMS)를 제공하며 적절한 수준의 감독을 제공하고 ABB의 승인을 받아야 합니다.</li>
+          </ul>
+
+          <div class="sec-h2">5.2 협력업체 관리 요구사항</div>
+          <p class="doc-p">협력업체 조직의 경영진은 긍정적인 건강 및 안전 문화를 장려하고 직원들 사이에 HSE 인식을 구축해야 할 위임할 수 없는 책임이 있습니다. 협력업체 경영진 및 관리자는 다음을 수행해야 합니다:</p>
+          <ul class="doc-ul">
+            <li>사고, 위험한 사건, 업무상 질병, 아차사고, 불안전한 행동 또는 상태와 같은 모든 사건을 지체 없이 ABB 담당자에게 보고하고 조사에 협력해야 합니다.</li>
+            <li>현장에 반입되는 모든 기계 및 장비가 안전한 상태이며 유효한 법적/유지관리 인증서를 보유했는지 확인하고 장비 등록부를 ABB에 제공해야 합니다.</li>
+            <li>위험성 평가 및 작업절차서(RAMS)를 작성하고 관련 법적 양식과 일일/주간 체크리스트를 시행하며, 하위 협력업체 직원의 행동까지 전적으로 책임집니다.</li>
+            <li>모든 현장 회의에서 HSE를 주요 의제로 다루며 HSE 관리의 모든 문제에서 리더십을 발휘합니다.</li>
+          </ul>
+
+          <div class="sec-h1">6 의사소통 &amp; 협의</div>
+          <div class="sec-h2">6.1 일반</div>
+          <p class="doc-p">모든 기능 지원 및 관련 계약자를 포함한 프로젝트 구성원은 지속적인 협력, 조정, 인터페이스 및 커뮤니케이션을 통해 본 계획서 및 관련 문서에 요약된 HSE 표준, 프로세스, 책임 및 기대 사항을 효과적이고 시기적절하게 이행합니다.</p>
+
+          <div class="sec-h2">6.2 정보</div>
+          <p class="doc-p">프로젝트 전반에 걸쳐 전달되는 데이터 또는 정보에는 고객 정보 및 고객사 요구사항, ABB·고객·협력업체 HSE 정책, 프로젝트별 안전 목표, 현장 요구사항 및 제한 사항, 위험요소·사고 및 위험성 평가·작업절차서(RAMS), 역량 및 교육 요구 사항, 현장 안전 규칙, 비상조치, 폐기물 관리, 환경 고려사항, 주간/월간 현장 보고서 및 기타 HSE 관련 서류가 포함됩니다.</p>
+
+          <div class="sec-h2">6.3 HSE 서류</div>
+          <p class="doc-p">프로젝트 기간 동안 모든 협력업체는 관련 정보가 HSE 파일에 포함되도록 준비할 책임이 있습니다. 파일에는 설계 기준·도면·계산서·계획서, 공법 및 재료 세부 사항, 구조 설비 및 정비 시설 세부 사항, 구조물 유지 관리 절차, 비상 및 소방 시스템과 유틸리티/격리 위치 및 특성에 대한 세부 사항이 포함됩니다.</p>
+          <p class="doc-p">최종 문서는 주 계약약관에 따라 하드카피와 전자문서(도면 및 스캔 문서는 별도 합의가 없는 한 PDF 형식)로 고객에게 제공되며, 완료 및 인계 인증서, 기술 사양·작동 및 유지보수 매뉴얼, 제품 안전 및 신뢰성 데이터를 포함합니다.</p>
+        </div>
+        ${getPageFooterHtml(7, 10)}
+      </div>
+    `);
+
+    /* -------------------- PAGE 8: 6.4 ~ 6.8 (사고 보고 과정 및 SVG 흐름도) -------------------- */
+    pagesHtml.push(`
+      <div class="a4-page" data-page-index="8">
+        ${getPageHeaderHtml()}
+        <div class="page-body">
+          <div class="sec-h2" style="margin-top:0;">6.4 프로젝트 의사소통 계획</div>
+          <p class="doc-p">ABB는 모든 협력업체가 참석하는 안전보건 회의를 개최하며, HSE는 개별 협력업체 진행회의 및 주간 안전/조정 회의의 주요 안건으로 다뤄집니다.</p>
+          <table class="doc-table">
+            <thead>
+              <tr><th style="width:28%;">회의 구분</th><th style="width:16%;">빈도</th><th style="width:28%;">개최 시기</th><th style="width:28%;">참석자</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="text-bold">킥오프 미팅</td><td class="text-center">필요시</td><td class="text-center">신규 협력업체 현장 투입 전</td><td class="text-center">ABB / 협력업체 관리자</td></tr>
+              <tr><td class="text-bold">현장 HSE / 진행상황 미팅</td><td class="text-center">매월</td><td class="text-center">정기 월간 일정</td><td class="text-center">ABB / 고객사</td></tr>
+              <tr><td class="text-bold">내부 HSE / 진행상황</td><td class="text-center">매주</td><td class="text-center">정기 주간 일정</td><td class="text-center">ABB 경영진</td></tr>
+              <tr><td class="text-bold">Toolbox talk</td><td class="text-center">매일</td><td class="text-center">매일 작업 시작 전</td><td class="text-center">ABB / 협력업체</td></tr>
+            </tbody>
+          </table>
+          <p class="doc-p"><b>Toolbox talk:</b> ABB에서 현장 직원을 대상으로 매일 실시하며 현장에서 확인된 위험요소, 모범 사례, 작업 변경 사항 및 안전 주제를 다룹니다. 참석 명단을 포함한 기록이 유지되어야 합니다.</p>
+
+          <div class="sec-h2">6.5 작업자 상담 및 사고 조사 원칙</div>
+          <p class="doc-p">모든 사건과 사고는 ABB와 협력하여 기록 및 조사하여 직접적·근본적 원인을 파악하고 재발방지 대책과 시정조치 계획을 수립해야 합니다. 각각의 사고는 ABB 사고 보고 모듈(<b>INTELEX</b>)에 기록되며 주간 현장 HSE 회의에서 논의됩니다.</p>
+
+          <div class="sec-h2">6.6 사고 보고 과정</div>
+          <table class="doc-table" style="font-size:7.6pt;">
+            <thead>
+              <tr>
+                <th style="width:24%;">보고 대상</th>
+                <th style="width:10%;">아차 사고</th>
+                <th style="width:10%;">응급처치<br/>사고</th>
+                <th style="width:11%;">의학적 치료<br/>사고</th>
+                <th style="width:10%;">직업성<br/>질병</th>
+                <th style="width:11%;">근로손실<br/>사고</th>
+                <th style="width:14%;">중대재해 및<br/>고위험사고</th>
+                <th style="width:10%;">사망</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="text-bold">협력업체 또는 ABB 현장 관리자</td><td class="text-center">즉시</td><td class="text-center">즉시</td><td class="text-center">즉시</td><td class="text-center">즉시</td><td class="text-center">즉시</td><td class="text-center">즉시</td><td class="text-center">즉시</td></tr>
+              <tr><td class="text-bold">Hub / LBL Management</td><td class="text-center">30일 이내</td><td class="text-center">30일 이내</td><td class="text-center">24시간 이내</td><td class="text-center">30일 이내</td><td class="text-center">즉시</td><td class="text-center">즉시</td><td class="text-center">즉시</td></tr>
+              <tr><td class="text-bold">ABB 호스트 국가 HSE 관리자</td><td class="text-center">30일 이내</td><td class="text-center">30일 이내</td><td class="text-center">24시간 이내</td><td class="text-center">30일 이내</td><td class="text-center">즉시</td><td class="text-center">즉시</td><td class="text-center">즉시</td></tr>
+              <tr><td class="text-bold">고객사 (${escapeHtml(client)})</td><td class="text-center">30일 이내</td><td class="text-center">30일 이내</td><td class="text-center">24시간 이내</td><td class="text-center">30일 이내</td><td class="text-center">즉시</td><td class="text-center">즉시</td><td class="text-center">즉시</td></tr>
+              <tr><td class="text-bold">집행 기관 (관계 당국)</td><td class="text-center">N/A</td><td class="text-center">N/A</td><td class="text-center">N/A</td><td class="text-center">30일 이내</td><td class="text-center">30일 이내</td><td class="text-center">즉시</td><td class="text-center">즉시</td></tr>
+            </tbody>
+          </table>
+
+          ${buildIncidentFlowchartSvg()}
+
+          <div class="sec-h2">6.8 사고 보고 요구사항</div>
+          <p class="doc-p">모든 아차사고, 사고 및 위험한 상황은 즉시 프로젝트 관리팀에 구두 보고 또는 근무일 종료 전까지 사고 보고서 양식으로 서면 보고되어야 합니다. 고객에게는 ABB가 직접 연락 및 관련 정보를 제공하며, 고객사는 ABB 및 관련 협력업체와 함께 조사 과정을 지원하기 위해 필요한 모든 정보가 제공되었는지 확인합니다.</p>
+        </div>
+        ${getPageFooterHtml(8, 10)}
+      </div>
+    `);
+
+    /* -------------------- PAGE 9: 7. 자원 & 8. 교육 & 역량 -------------------- */
+    pagesHtml.push(`
+      <div class="a4-page" data-page-index="9">
+        ${getPageHeaderHtml()}
+        <div class="page-body">
+          <div class="sec-h1">7 자원</div>
+          <div class="sec-h2">7.1 일반</div>
+          <p class="doc-p">자원 요구 사항은 프로젝트 관리의 필수적인 부분이며, 안전한 시행을 감독하는 프로젝트 관리자, 설계 적합성을 확인하는 프로젝트 엔지니어 및 HSE 고문이 배치됩니다.</p>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 4mm;">
+            <div>
+              <div class="sec-h3">7.1.1 필수 HSE 문서</div>
+              <ul class="doc-ul">
+                <li>점검 양식 및 Hazard·SOT 등록기록 (INTELEX)</li>
+                <li>위험성 평가 및 HSE 활동 계획</li>
+                <li>작업 전 안전점검표 (Stop Take 5)</li>
+                <li>사고 기록 및 조사 보고서</li>
+                <li>Toolbox talk 기록, 교육 기록 및 비상 계획</li>
+              </ul>
+            </div>
+            <div>
+              <div class="sec-h3">7.1.2 보안 및 7.1.3 안전 표지판</div>
+              <ul class="doc-ul">
+                <li>표지판이 부착된 펜스/임시 바리케이드, 보안 출입구 통제, 야간 접근 조명 및 굴착 구간 이중 클리핑 펜싱</li>
+                <li>장비 전원 차단·키 제거 보안조치 및 근무시간 외 비상 연락처 부착</li>
+                <li>필수 표지판: 주차 제한, PPE 요구사항, 비상 집결지·비상구, 보관창고, 통행로, 흡연 구역</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="sec-h3">7.1.4 장비, 수공구 &amp; 전동공구 및 개인보호구</div>
+          <ul class="doc-ul">
+            <li>모든 도구와 장비는 법적/제조업체 요구사항 및 인증서 사본에 따라 인증되어야 하며, 안전화·안전모·방염복·보안경 등 필수 PPE를 착용합니다.</li>
+            <li>비계 등 고소작업 시 고소작업대 및 안전그네 착용, 220V 리드 강화 및 30mA RCD 누전차단기 보호 적용</li>
+            <li>폐기물 분리 수집 용기, 유출 키트, 인화성 물질 잠금식 용기, 가스통 금속 케이지, 화재 담요·감지기·경보 시스템 비치</li>
+          </ul>
+
+          <div class="sec-h2">7.2 폐기물 관리 (SA-S-203)</div>
+          <ul class="doc-ul">
+            <li><b>폐기물 재사용 &amp; 재활용:</b> 포장재 재활용 프로그램을 구축하고 전기 부품, 형광등 및 배선 등 전기 폐기물은 허가된 폐기물 관리 업체에서 수거·재활용합니다.</li>
+            <li><b>폐기물 분리:</b> 금속, 목재, 종이, 일반/음식물 폐기물별로 라벨이 부착된 누출 방지 수거함에 분리 보관하고 최종 처리 시까지 분리 상태를 유지합니다.</li>
+          </ul>
+
+          <div class="sec-h1">8 교육 &amp; 역량</div>
+          <div class="sec-h2">8.1 일반</div>
+          <p class="doc-p">프로젝트 안전보건관리 계획서는 ABB 직원 및 협력업체의 역량 강화를 위해 신규 채용자 교육, ABB 전문화 교육, 교통 안전 교육, 수동/전동공구 사용 교육, 화기 작업 교육, 응급 처치 교육 및 기타 현장 필요 안전보건 교육을 제공합니다.</p>
+
+          <div class="sec-h2">8.2 현장 신규 교육 (Induction)</div>
+          <p class="doc-p">현장 신규교육은 현장의 모든 새로운 인원을 위해 <b>${escapeHtml(client)}</b>이(가) 진행합니다. 직무 세부사항은 안내 시작 전 작성되어 ABB에 전달되어야 하며, 현장 설명, 사고 보고 절차, 위험성 평가 및 작업허가 시스템(PTW), 복지 시설, 출입 절차, 기본 보호구, 비상연락처, 현장 교통규정, 구급·소방 담당자 및 설비, 비상구, 유해 물질 위치, 제한 구역 및 밀폐 공간, 환경 요구사항을 포함합니다.</p>
+
+          <div class="sec-h2">8.3 특별 교육</div>
+          <p class="doc-p">ABB는 현장에 있는 모든 직원과 협력업체가 업무를 안전하게 수행하기 위한 관련 교육을 받았는지 확인하며, 모든 직원이 실제 또는 잠재적인 HSE 결과와 개인 성과 향상에 대한 HSE 이점을 인식하도록 합니다.</p>
+        </div>
+        ${getPageFooterHtml(9, 10)}
+      </div>
+    `);
+
+    /* -------------------- PAGE 10: 9. 모니터링 ~ 11. 정의 & 약어 -------------------- */
+    pagesHtml.push(`
+      <div class="a4-page" data-page-index="10">
+        ${getPageHeaderHtml()}
+        <div class="page-body">
+          <div class="sec-h1">9 모니터링, 감사, 시정 조치 및 검토</div>
+          <div class="sec-h2">9.1 상태 모니터링 및 프로젝트 모니터링 계획</div>
+          <p class="doc-p">ABB와 협력업체는 위험성 평가 및 작업절차서 준수, 협력업체 역량, SOT/감사 보고, 기계·장비 점검 및 인증서, Toolbox talk, 주간 안전 보고, 작업 허가서, 정리정돈 및 INTELEX 보고 절차를 협의된 계획에 따라 모니터링합니다.</p>
+
+          <table class="doc-table" style="font-size:7.5pt; line-height:1.22;">
+            <thead>
+              <tr>
+                <th style="width:18%;">모니터링 대상</th>
+                <th style="width:22%;">적용할 프로세스</th>
+                <th style="width:22%;">취득/전달 정보</th>
+                <th style="width:18%;">담당자 (누가)</th>
+                <th style="width:20%;">주기 (언제)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="text-bold">위험성 평가, 작업절차서</td><td>검토, 승인 및 기록 보관</td><td>기록 및 승인</td><td class="text-center">프로젝트 관리자 / 협력업체</td><td class="text-center">매일</td></tr>
+              <tr><td class="text-bold">아차 사고</td><td>이벤트 로그 기록 및 조사</td><td>원인 및 개선책 기록</td><td class="text-center">프로젝트 관리자 / 협력업체</td><td class="text-center">즉시 (당일 종료 원칙)</td></tr>
+              <tr><td class="text-bold">사고</td><td>사고 기록부 기록 &amp; 고객 보고</td><td>원인 및 개선책 기록</td><td class="text-center">PM / HSE / 협력업체</td><td class="text-center">24시간 이내 보고, 7일 이내 조사</td></tr>
+              <tr><td class="text-bold">근로 손실 사고</td><td>사고 기록부 기록 &amp; 고객 보고</td><td>원인, 개선책, 근로손실일수</td><td class="text-center">PM / HSE / 협력업체</td><td class="text-center">24시간 이내 보고, 7일 이내 조사</td></tr>
+              <tr><td class="text-bold">안전 점검 / 감사</td><td>둘러보기 / 체계적 감사</td><td>적합 및 부적합 사항</td><td class="text-center">PM / HSE / 협력업체</td><td class="text-center">매주 / 매월</td></tr>
+              <tr><td class="text-bold">ABB Way 내부평가</td><td>체계적 감사</td><td>모범 사례, 적합성, 개선기회</td><td class="text-center">HSE 관리자 / GFSA 감사팀</td><td class="text-center">매주 / 매월</td></tr>
+              <tr><td class="text-bold">Toolbox meetings</td><td>기록 보관</td><td>신규 위험요소 / 공정 변경</td><td class="text-center">프로젝트 관리자 / 협력업체</td><td class="text-center">매일 &amp; 필요시</td></tr>
+              <tr><td class="text-bold">근로시간</td><td>근무 기록표 / 주간·월간 통계</td><td>초과근무 및 실제 근무 시간</td><td class="text-center">PM / HSE / 협력업체</td><td class="text-center">매주 / 매월</td></tr>
+              <tr><td class="text-bold">안전보건관리 계획서</td><td>OHS&amp;E 절차 정기 검토</td><td>절차 변경 / 법률 개정 / 현장요구</td><td class="text-center">HSE 담당자</td><td class="text-center">변경 시 / 매년</td></tr>
+            </tbody>
+          </table>
+
+          <div class="sec-h1">10 프로젝트 종료</div>
+          <p class="doc-p">"HSE 파일" 내용을 포함하여 완료된 프로젝트에 대한 정보는 "최종 계획 문서(Final Plan Documentation)"에 제공됩니다. 향후 프로젝트 활동을 위해 학습한 교훈(Lessons Learned)을 공식적으로 기록하기 위한 프로젝트 종결 미팅이 열릴 것입니다.</p>
+
+          <div class="sec-h1">11 정의 &amp; 약어</div>
+          <ul class="doc-ul" style="font-size:7.6pt; line-height:1.25;">
+            <li><b>ABRA:</b> 활동 기반 위험 평가 (Activity Based Risk Assessment) / <b>RAMS:</b> 위험성평가 및 작업절차서</li>
+            <li><b>EMP:</b> 환경 관리 계획 (Environmental Management Plan) / <b>SDS/MSDS:</b> 물질안전보건자료</li>
+            <li><b>위험요소 (Hazard):</b> 유해를 초래할 가능성이 있는 불안전한 행동 및/또는 상태 / <b>Risk:</b> 부정적 영향을 끼칠 잠재적 가능성</li>
+            <li><b>아차 사고 (Near Miss):</b> 부상이 발생할 뻔하였으나 직접적인 부상으로는 이어지지 않은 위기 상황 사건</li>
+            <li><b>PICW (작업담당자):</b> 감전·아크플래시 가능성이 있는 전기 환경에서 전기 작업을 관리하도록 지명된 권한 보유자</li>
+            <li><b>합리적으로 실행 가능 (ALARP):</b> 위험을 식별·평가하여 적절한 보호 및 예방 조치를 취하는 균형 잡힌 안전 관리 원칙</li>
+            <li><b>SOT (지속가능성 관찰 투어):</b> 관리자가 작업 장소를 방문하여 작업을 관찰하고 근로자들과 HSE 및 일상 작업 행동에 대해 대화하는 활동</li>
+          </ul>
+        </div>
+        ${getPageFooterHtml(10, 10)}
+      </div>
+    `);
+
+    const printArea = document.getElementById('print-area');
+    printArea.innerHTML = pagesHtml.join('');
+
+    // 동적 내용 증가 시 오버플로우 자동 페이지 분할 및 페이지 번호 동기화
+    paginateOverflowingPages();
+  }
+
+  /* ==================== 동적 오버플로우 자동 분할 (미리보기 = 인쇄 100% 일치 보장) ==================== */
+  function paginateOverflowingPages() {
+    const printArea = document.getElementById('print-area');
+    let pages = Array.from(printArea.querySelectorAll('.a4-page'));
+    let safetyCounter = 0;
+
+    while (safetyCounter < 15) {
+      safetyCounter++;
+      let splitOccurred = false;
+      pages = Array.from(printArea.querySelectorAll('.a4-page'));
+
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+        const body = page.querySelector('.page-body');
+        if (!body) continue;
+
+        // page-body 내부 실제 콘텐츠 높이가 가용 높이를 초과하는 경우 마지막 블록 요소들을 다음 페이지로 이월
+        if (body.scrollHeight > body.clientHeight + 2 && body.children.length > 1) {
+          const newPage = document.createElement('div');
+          newPage.className = 'a4-page';
+          newPage.innerHTML = `
+            ${getPageHeaderHtml()}
+            <div class="page-body"></div>
+            ${getPageFooterHtml(1, 1)}
+          `;
+          const newBody = newPage.querySelector('.page-body');
+
+          while (body.scrollHeight > body.clientHeight + 2 && body.children.length > 1) {
+            const lastChild = body.lastElementChild;
+            newBody.insertBefore(lastChild, newBody.firstChild);
+          }
+
+          page.insertAdjacentElement('afterend', newPage);
+          splitOccurred = true;
+          break;
+        }
+      }
+
+      if (!splitOccurred) break;
+    }
+
+    // 최종 전체 페이지 번호 일괄 업데이트 (미리보기 & 인쇄 동일)
+    const finalPages = Array.from(printArea.querySelectorAll('.a4-page'));
+    const total = finalPages.length;
+    finalPages.forEach((p, idx) => {
+      const label = p.querySelector('.page-num-label');
+      if (label) {
+        label.textContent = `Page ${idx + 1} of ${total}`;
+      }
+    });
+
+    const countEl = document.getElementById('preview-page-count');
+    if (countEl) {
+      countEl.textContent = `실시간 A4 미리보기 (총 ${total}페이지 · 인쇄 동일)`;
+    }
+  }
+
+  function renderAll() {
+    renderKeyContactsInput();
+    renderContractorsInput();
+    renderHazardSummary();
+    renderDocument();
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    loadInitialState();
+    fitPreviewZoom();
+  });
+
+  window.addEventListener('resize', () => {
+    fitPreviewZoom();
+  });
+</script>
+</body>
+</html>
